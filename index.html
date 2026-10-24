@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tibia 7.x Classic - 2D Oblique RPG (Multiplayer)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap');
+
+    :root {
+      --tibia-bg: #2b2b2b;
+      --tibia-panel: #383838;
+      --tibia-slot: #222222;
+      --tibia-border-light: #6e6e6e;
+      --tibia-border-dark: #141414;
+      --tibia-gold: #e5c158;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121214;
+      background-image: radial-gradient(#29292e 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: #d8d8d8;
+      font-family: 'Tahoma', 'Inter', sans-serif;
+      font-size: 12px;
+      overflow-x: hidden;
+    }
+
+    /* Classic Beveled Tibia 7.x Borders */
+    .tibia-window {
+      background-color: var(--tibia-panel);
+      border-top: 2px solid var(--tibia-border-light);
+      border-left: 2px solid var(--tibia-border-light);
+      border-right: 2px solid var(--tibia-border-dark);
+      border-bottom: 2px solid var(--tibia-border-dark);
+      box-shadow: inset 1px 1px 0px #4f4f4f, 0 4px 12px rgba(0,0,0,0.65);
+    }
+
+    .tibia-inset {
+      background-color: var(--tibia-slot);
+      border-top: 2px solid var(--tibia-border-dark);
+      border-left: 2px solid var(--tibia-border-dark);
+      border-right: 2px solid var(--tibia-border-light);
+      border-bottom: 2px solid var(--tibia-border-light);
+    }
+
+    .tibia-header {
+      background: linear-gradient(90deg, #252525 0%, #444444 50%, #252525 100%);
+      border-bottom: 1px solid #151515;
+      color: #c9c9c9;
+      font-weight: bold;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    .tibia-btn {
+      background-color: #464646;
+      border-top: 2px solid #7a7a7a;
+      border-left: 2px solid #7a7a7a;
+      border-right: 2px solid #181818;
+      border-bottom: 2px solid #181818;
+      color: #eaeaea;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      cursor: pointer;
+      text-shadow: 1px 1px 0 #000;
+      transition: filter 0.1s;
+    }
+
+    .tibia-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .tibia-btn:active, .tibia-btn.active {
+      border-top: 2px solid #181818;
+      border-left: 2px solid #181818;
+      border-right: 2px solid #7a7a7a;
+      border-bottom: 2px solid #7a7a7a;
+      background-color: #303030;
+      transform: translate(1px, 1px);
+    }
+
+    /* Viewport Canvas Crisp Pixelation */
+    #game {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background-color: #000;
+      cursor: crosshair;
+      display: block;
+    }
+
+    /* Item Slots (36x36px) */
+    .item-slot {
+      width: 36px;
+      height: 36px;
+      background-color: #1f1f1f;
+      border-top: 2px solid #121212;
+      border-left: 2px solid #121212;
+      border-right: 2px solid #585858;
+      border-bottom: 2px solid #585858;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+    }
+
+    .item-slot:hover {
+      border-color: #888;
+      background-color: #282828;
+    }
+
+    .item-slot.drag-over {
+      outline: 2px dashed #facc15;
+      background-color: #35321f;
+    }
+
+    .item-slot img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+
+    .item-count {
+      position: absolute;
+      bottom: 1px;
+      right: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .slot-placeholder {
+      font-size: 9px;
+      color: #525252;
+      text-align: center;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    /* Classic Tibia 7.x Modal Overlay */
+    .tibia-modal-backdrop {
+      background: radial-gradient(circle at center, rgba(24, 24, 28, 0.88) 0%, rgba(8, 8, 10, 0.96) 100%);
+      backdrop-filter: blur(2px);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-left: 1px solid #111;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4e4e4e;
+      border: 1px solid #222;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+
+  <!-- CLASSIC TIBIA 7.x ACCOUNT & CHARACTER LOGIN MODAL -->
+  <div id="account-modal" class="fixed inset-0 z-50 tibia-modal-backdrop flex items-center justify-center p-3">
+    <div class="tibia-window w-full max-w-[460px] p-3 text-xs relative">
+      <div class="tibia-header mb-3">
+        <span>TIBIA 7.4 - ACCOUNT & SERVER LOGIN</span>
+        <span id="db-conn-badge" class="text-[10px] text-amber-300 font-mono">Conectando...</span>
+      </div>
+
+      <!-- Banner Art -->
+      <div class="tibia-inset p-3 mb-3 bg-gradient-to-b from-[#1f1c18] to-[#121316] flex items-center justify-between border border-amber-900/40">
+        <div>
+          <div class="text-amber-400 font-bold text-sm tracking-wider">TIBIA DEDICATED ONLINE</div>
+          <div class="text-[11px] text-neutral-400 mt-0.5">Render WebSocket Server (Max 5 Players)</div>
+        </div>
+        <div class="text-right font-mono text-[10px] text-emerald-400">
+          <div>Client v7.42</div>
+          <div id="modal-ping-display">Host: Render</div>
+        </div>
+      </div>
+
+      <!-- Server Host Settings -->
+      <div class="tibia-inset p-2 mb-2 bg-[#171717] flex items-center justify-between gap-2">
+        <label class="text-[10px] text-neutral-400 whitespace-nowrap">WebSocket Server:</label>
+        <input id="server-ws-url" type="text" value="wss://server-mmo.onrender.com" class="tibia-inset flex-1 px-1.5 py-0.5 text-[11px] text-amber-300 bg-[#0d0d0d] font-mono focus:outline-none" />
+        <button type="button" id="btn-reconnect-server" class="tibia-btn text-[10px] py-0.5 px-2">Reconectar</button>
+      </div>
+
+      <!-- Auth Mode Switcher -->
+      <div class="flex gap-1 mb-2">
+        <button id="tab-auth-login" class="tibia-btn active flex-1 py-1 text-amber-300">Entrar na Conta</button>
+        <button id="tab-auth-register" class="tibia-btn flex-1 py-1">Criar Nova Conta</button>
+      </div>
+
+      <!-- Login / Register Form -->
+      <form id="auth-form" class="space-y-2 tibia-inset p-2.5 bg-[#1b1b1b]">
+        <div>
+          <label class="block text-[11px] text-neutral-300 mb-0.5">Account Name / Número:</label>
+          <input id="auth-username" type="text" required value="player1" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212] focus:outline-none focus:border-amber-400" placeholder="Ex: knight74" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-neutral-300 mb-0.5">Password:</label>
+          <input id="auth-password" type="password" required value="tibia123" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212] focus:outline-none focus:border-amber-400" placeholder="••••••••" />
+        </div>
+
+        <div id="register-extra-fields" class="hidden space-y-2 pt-1 border-t border-neutral-800">
+          <div>
+            <label class="block text-[11px] text-amber-300 mb-0.5">Nome do Personagem (Character Name):</label>
+            <input id="auth-charname" type="text" value="Knight Hero" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212] focus:outline-none focus:border-amber-400" placeholder="Ex: Bubble, Eternal Oblivion" />
+          </div>
+          <div>
+            <label class="block text-[11px] text-neutral-300 mb-0.5">Vocação Inicial:</label>
+            <select id="auth-vocation" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212]">
+              <option value="Elite Knight">Elite Knight (+HP / Espada & Escudo)</option>
+              <option value="Royal Paladin">Royal Paladin (Equilibrado)</option>
+              <option value="Master Sorcerer">Master Sorcerer (+Mana / Magias)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="auth-feedback" class="text-[11px] text-amber-300 min-h-[16px] font-mono"></div>
+
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <button type="submit" id="btn-auth-submit" class="tibia-btn flex-1 py-1.5 text-emerald-300">
+            Conectar ao Servidor
+          </button>
+          <button type="button" id="btn-quick-guest" class="tibia-btn py-1.5 px-3 text-amber-300" title="Entrar no modo Offline/Sessão Local">
+            ⚡ Jogar Offline
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Top Utility & Hotkey Bar -->
+  <div class="w-full max-w-[920px] tibia-window mb-2 px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 rounded-sm">
+    <div class="flex items-center gap-2">
+      <span id="online-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="font-bold text-amber-400 tracking-wide text-xs">TIBIA 7.4 ENGINE</span>
+      <span id="account-status-badge" class="text-[10px] bg-black/50 px-1.5 py-0.5 border border-neutral-700 text-emerald-300 font-mono">Server: Conectando...</span>
+      <span id="online-players-count" class="text-[10px] bg-black/50 px-1.5 py-0.5 border border-neutral-700 text-sky-300 font-mono">1/5 Online</span>
+    </div>
+
+    <!-- Quick Hotkeys & Cloud / Net Controls -->
+    <div class="flex flex-wrap items-center gap-1.5">
+      <button id="btn-hotkey-potion" class="tibia-btn flex items-center gap-1 text-rose-300" title="Beber Poção de Vida (F1)">
+        <span>[F1] Poção</span>
+      </button>
+      <button id="btn-hotkey-exura" class="tibia-btn flex items-center gap-1 text-sky-300" title="Magia Light Healing - 20 MP (F2)">
+        <span>[F2] "exura"</span>
+      </button>
+      <button id="btn-hotkey-exori" class="tibia-btn flex items-center gap-1 text-amber-300" title="Berserk AoE - 30 MP (F3)">
+        <span>[F3] "exori"</span>
+      </button>
+      <button id="btn-look-mode" class="tibia-btn flex items-center gap-1 text-emerald-300" title="Alternar modo Inspecionar (Look) ou segure SHIFT + Clique">
+        <span>🔍 Look: OFF</span>
+      </button>
+      <button id="btn-net-inspector" class="tibia-btn flex items-center gap-1 text-purple-300" title="Abrir Inspetor de Pacotes Multiplayer">
+        <span>🌐 Net/WS</span>
+      </button>
+      <button id="btn-save-db" class="tibia-btn flex items-center gap-1 text-amber-300" title="Salvar Personagem no Servidor Online">
+        <span>💾 Salvar</span>
+      </button>
+      <button id="btn-open-account" class="tibia-btn flex items-center gap-1 text-neutral-200" title="Trocar de Conta ou Servidor">
+        <span>👤 Conta</span>
+      </button>
+      <button id="btn-sound" class="tibia-btn" title="Ativar/Desativar Efeitos Sonoros">
+        🔊
+      </button>
+    </div>
+  </div>
+
+  <!-- NETWORK PACKET INSPECTOR DRAWER -->
+  <div id="net-inspector-panel" class="hidden w-full max-w-[920px] tibia-window mb-2 p-2 text-xs">
+    <div class="tibia-header mb-1.5">
+      <span>MULTIPLAYER WEBSOCKET INSPECTOR (server-mmo.onrender.com)</span>
+      <div class="flex items-center gap-2">
+        <span id="net-stats-counter" class="text-[10px] font-mono text-emerald-300">TX: 0 pkts | RX: 0 pkts</span>
+        <button id="btn-close-net" class="text-rose-400 font-bold px-1">✕</button>
+      </div>
+    </div>
+    <div id="net-packet-log" class="tibia-inset h-[92px] overflow-y-auto p-1.5 font-mono text-[11px] bg-[#121318] space-y-0.5"></div>
+  </div>
+
+  <!-- Main Client Frame -->
+  <div class="w-full max-w-[920px] grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-2 items-start">
+
+    <!-- LEFT COLUMN: Game Viewport + Chat/Server Log -->
+    <div class="flex flex-col gap-2">
+
+      <!-- GAME VIEWPORT (480x352 native, 15x11 tiles) -->
+      <div class="tibia-window p-2 flex flex-col items-center justify-center relative">
+        <div class="w-full tibia-header mb-1.5">
+          <span>VIEWPORT DO JOGO (15x11 Tiles | Clique longe para A* Auto-Walk)</span>
+          <div class="flex items-center gap-2">
+            <span id="path-status" class="text-[10px] font-mono text-emerald-400 hidden">A* Rota Ativa</span>
+            <span id="coords-display" class="text-[10px] font-mono text-amber-300">Pos: (7, 7)</span>
+          </div>
+        </div>
+
+        <!-- Canvas Wrapper -->
+        <div class="tibia-inset relative overflow-hidden flex items-center justify-center bg-black">
+          <canvas id="game" width="480" height="352" class="w-[480px] h-[352px] sm:w-[600px] sm:h-[440px] max-w-full"></canvas>
+
+          <!-- Drag Ghost Indicator inside Canvas -->
+          <div id="canvas-drop-hint" class="hidden absolute inset-0 pointer-events-none border-2 border-amber-400/70 bg-amber-500/5 flex items-end justify-center pb-2">
+            <span class="bg-black/80 text-amber-300 px-2 py-0.5 text-[11px] rounded">Solte em um tile adjacente para jogar no chão</span>
+          </div>
+        </div>
+
+        <!-- Mobile / On-Screen Directional Pad -->
+        <div class="w-full mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-300 bg-[#2a2a2a] px-2.5 py-1.5 border border-[#1a1a1a]">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-semibold">Controles:</span>
+            <span><b>Clique no Mapa</b>: A* Auto-Walk | <b>WASD/Setas</b>: Passo | <b>Clique Dir</b>: Usar/Abrir</span>
+          </div>
+          <div class="flex items-center gap-1 ml-auto">
+            <button data-move="NW" class="tibia-btn px-1.5 py-0.5">↖</button>
+            <button data-move="N" class="tibia-btn px-2 py-0.5">▲</button>
+            <button data-move="NE" class="tibia-btn px-1.5 py-0.5">↗</button>
+            <button data-move="W" class="tibia-btn px-2 py-0.5">◄</button>
+            <button data-move="S" class="tibia-btn px-2 py-0.5">▼</button>
+            <button data-move="E" class="tibia-btn px-2 py-0.5">►</button>
+            <button data-move="SW" class="tibia-btn px-1.5 py-0.5">↙</button>
+            <button data-move="SE" class="tibia-btn px-1.5 py-0.5">↘</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM CONSOLE: Server Log & Default Chat -->
+      <div class="tibia-window p-1.5 flex flex-col h-[175px]">
+        <div class="flex items-center justify-between border-b border-[#181818] pb-1 mb-1">
+          <div class="flex gap-1">
+            <button id="tab-server-log" class="tibia-btn active text-amber-300">Server Log</button>
+            <button id="tab-default-chat" class="tibia-btn text-neutral-300">Default Chat</button>
+          </div>
+          <span class="text-[10px] text-neutral-400 pr-1">Fale com outros jogadores no chat ou use: <b>exura</b>, <b>exori</b>, <b>/save</b></span>
+        </div>
+
+        <div id="log" class="tibia-inset flex-1 overflow-y-auto p-2 font-mono text-[12px] leading-relaxed space-y-0.5 select-text"></div>
+
+        <form id="chat-form" class="mt-1.5 flex gap-1">
+          <input
+            id="chat-input"
+            type="text"
+            placeholder='Fale no chat ou use "exura", "exori", "/save"...'
+            autocomplete="off"
+            class="tibia-inset flex-1 px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500"
+          />
+          <button type="submit" class="tibia-btn px-3">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Classic Tibia Sidebar -->
+    <div class="flex flex-col gap-2 w-full">
+
+      <!-- 1. STATUS PANEL -->
+      <div class="tibia-window p-2">
+        <div class="tibia-header mb-2">
+          <span id="player-name-title">Knight Hero</span>
+          <span id="player-level-badge" class="text-amber-400">Lv. 1</span>
+        </div>
+
+        <div class="mb-1.5">
+          <div class="flex justify-between text-[11px] mb-0.5">
+            <span class="font-bold text-rose-400">Hit Points</span>
+            <span id="hp-text" class="font-mono">150 / 150</span>
+          </div>
+          <div class="w-full h-3.5 tibia-inset p-0.5">
+            <div id="hp-bar" class="h-full bg-gradient-to-r from-red-700 via-red-500 to-rose-400 transition-all duration-150" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="mb-1.5">
+          <div class="flex justify-between text-[11px] mb-0.5">
+            <span class="font-bold text-sky-400">Mana</span>
+            <span id="mp-text" class="font-mono">60 / 60</span>
+          </div>
+          <div class="w-full h-3.5 tibia-inset p-0.5">
+            <div id="mp-bar" class="h-full bg-gradient-to-r from-blue-800 via-blue-500 to-sky-400 transition-all duration-150" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <div class="flex justify-between text-[10px] text-neutral-300 mb-0.5">
+            <span>Experiência</span>
+            <span id="xp-text" class="font-mono">0 / 100 XP</span>
+          </div>
+          <div class="w-full h-2.5 tibia-inset p-0.5">
+            <div id="xp-bar" class="h-full bg-amber-500 transition-all duration-150" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1 text-[11px] tibia-inset p-1.5 bg-[#1c1c1c]">
+          <div class="flex justify-between px-1">
+            <span class="text-neutral-400">Ataque:</span>
+            <span id="stat-atk" class="font-bold text-amber-300">22</span>
+          </div>
+          <div class="flex justify-between px-1">
+            <span class="text-neutral-400">Defesa:</span>
+            <span id="stat-def" class="font-bold text-emerald-300">10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. EQUIPMENT SLOTS -->
+      <div class="tibia-window p-2">
+        <div class="tibia-header mb-2">
+          <span>EQUIPAMENTOS</span>
+          <span class="text-[9px] text-neutral-400">Arraste / Clique Dir</span>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 py-1">
+          <div class="flex flex-col items-center gap-0.5">
+            <div id="equip-weapon" data-slot-type="weapon" class="item-slot" title="Arma (Mão Direita)">
+              <span class="slot-placeholder">ARMA</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center gap-1.5">
+            <div id="equip-head" data-slot-type="head" class="item-slot" title="Elmo (Cabeça)">
+              <span class="slot-placeholder">ELMO</span>
+            </div>
+            <div id="equip-body" data-slot-type="armor" class="item-slot" title="Armadura (Tronco)">
+              <span class="slot-placeholder">CORPO</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center gap-0.5">
+            <div id="equip-shield" data-slot-type="shield" class="item-slot" title="Escudo (Mão Esquerda)">
+              <span class="slot-placeholder">ESCUDO</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. BATTLE LIST -->
+      <div class="tibia-window p-2">
+        <div class="tibia-header mb-1.5">
+          <span>BATTLE LIST</span>
+          <span id="battle-count" class="text-[10px] text-neutral-400">0 monstros</span>
+        </div>
+        <div id="battle-list" class="tibia-inset h-[96px] overflow-y-auto p-1 space-y-1"></div>
+      </div>
+
+      <!-- 4. CONTAINER SUB-WINDOW -->
+      <div id="container-panel" class="tibia-window p-2 hidden">
+        <div class="tibia-header mb-1.5">
+          <span id="container-title" class="text-amber-300">Baú / Loot</span>
+          <button id="btn-close-container" class="text-xs text-rose-400 hover:text-rose-200 font-bold px-1">✕</button>
+        </div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-neutral-400">Clique Dir ou Arraste</span>
+          <button id="btn-loot-all" class="tibia-btn text-[10px] py-0 px-1.5 text-amber-300">Pegar Tudo</button>
+        </div>
+        <div id="container-grid" class="tibia-inset p-1.5 grid grid-cols-4 gap-1 justify-items-center"></div>
+      </div>
+
+      <!-- 5. INVENTORY BACKPACK (20 Slots) -->
+      <div class="tibia-window p-2">
+        <div class="tibia-header mb-1.5">
+          <span>INVENTÁRIO (Mochila 20 Slots)</span>
+          <span class="text-[9px] text-neutral-400">4x5</span>
+        </div>
+        <div class="tibia-inset p-2 flex justify-center">
+          <div id="inventory-grid" style="display: grid; grid-template-columns: repeat(4, 36px); gap: 4px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * GERADOR PROCEDURAL DE SPRITES PIXEL ART 32x32 (Tibia 7.x)
+     ********************************************************************/
+    class SpriteCatalog {
+      constructor() {
+        this.images = {};
+        this.loaded = false;
+      }
+
+      createCanvas() {
+        const c = document.createElement('canvas');
+        c.width = 32;
+        c.height = 32;
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        return { c, ctx };
+      }
+
+      toImage(canvas) {
+        const img = new Image();
+        img.src = canvas.toDataURL('image/png');
+        return img;
+      }
+
+      generateAll() {
+        this.images['tile_grass'] = this.genGrassTile();
+        this.images['tile_stone'] = this.genStoneTile();
+        this.images['wall_brick'] = this.genObliqueWall();
+
+        const dirs = ['N', 'S', 'E', 'W'];
+        dirs.forEach(dir => {
+          for (let f = 0; f < 3; f++) {
+            this.images[`spr_player_${dir}_${f}`] = this.genKnightSprite(dir, f, false);
+            this.images[`spr_remote_${dir}_${f}`] = this.genKnightSprite(dir, f, true);
+          }
+        });
+        this.images['spr_player'] = this.images['spr_player_S_0'];
+
+        dirs.forEach(dir => {
+          for (let f = 0; f < 3; f++) {
+            this.images[`spr_orc_${dir}_${f}`] = this.genOrcSprite(dir, f, false);
+            this.images[`spr_orc_warlord_${dir}_${f}`] = this.genOrcSprite(dir, f, true);
+          }
+        });
+        this.images['spr_orc'] = this.images['spr_orc_S_0'];
+
+        this.images['item_potion'] = this.genPotionSprite();
+        this.images['item_sword'] = this.genSwordSprite('#d4d4d8', '#eab308');
+        this.images['item_fire_sword'] = this.genSwordSprite('#f97316', '#fde047', true);
+        this.images['item_axe'] = this.genAxeSprite();
+        this.images['item_shield'] = this.genShieldSprite('#94a3b8', '#eab308');
+        this.images['item_armor'] = this.genArmorSprite();
+        this.images['item_helmet'] = this.genHelmetSprite();
+        this.images['item_gold'] = this.genGoldSprite();
+        this.images['obj_chest'] = this.genChestSprite();
+        this.images['obj_corpse'] = this.genCorpseSprite();
+        this.images['fx_blood_0'] = this.genBloodSprite(0);
+        this.images['fx_blood_1'] = this.genBloodSprite(1);
+
+        this.loaded = true;
+      }
+
+      genGrassTile() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#244b1e';
+        ctx.fillRect(0, 0, 32, 32);
+        const shades = ['#1e3f19', '#2b5824', '#32632a', '#1a3715'];
+        for (let y = 0; y < 32; y += 2) {
+          for (let x = 0; x < 32; x += 2) {
+            ctx.fillStyle = shades[(x * 7 + y * 13) % shades.length];
+            ctx.fillRect(x, y, 2, 2);
+          }
+        }
+        const tufts = [[4, 6], [18, 4], [25, 14], [9, 20], [22, 26], [13, 12]];
+        tufts.forEach(([tx, ty]) => {
+          ctx.fillStyle = '#3f7c35';
+          ctx.fillRect(tx, ty, 1, 3);
+          ctx.fillRect(tx + 2, ty + 1, 1, 2);
+          ctx.fillStyle = '#539e46';
+          ctx.fillRect(tx + 1, ty - 1, 1, 3);
+        });
+        return this.toImage(c);
+      }
+
+      genStoneTile() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#4a4d52';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = '#26282b';
+        ctx.fillRect(0, 15, 32, 2);
+        ctx.fillRect(15, 0, 2, 16);
+        ctx.fillRect(7, 16, 2, 16);
+        ctx.fillRect(23, 16, 2, 16);
+        ctx.fillStyle = '#63676e';
+        ctx.fillRect(2, 2, 11, 2);
+        ctx.fillRect(18, 2, 11, 2);
+        ctx.fillRect(10, 18, 11, 2);
+        return this.toImage(c);
+      }
+
+      genObliqueWall() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#111113';
+        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillStyle = '#737780';
+        ctx.fillRect(1, 1, 30, 10);
+        ctx.fillStyle = '#8e929c';
+        ctx.fillRect(2, 2, 28, 2);
+        ctx.fillStyle = '#505359';
+        ctx.fillRect(1, 11, 30, 20);
+        ctx.fillStyle = '#232426';
+        ctx.fillRect(0, 11, 32, 2);
+        ctx.fillRect(0, 18, 32, 1);
+        ctx.fillRect(0, 25, 32, 1);
+        ctx.fillRect(10, 12, 1, 6);
+        ctx.fillRect(22, 12, 1, 6);
+        ctx.fillRect(5, 19, 1, 6);
+        ctx.fillRect(16, 19, 1, 6);
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, 31, 31);
+        return this.toImage(c);
+      }
+
+      genKnightSprite(dir, frame, isRemote = false) {
+        const { c, ctx } = this.createCanvas();
+        const stepY = frame === 1 ? -1 : frame === 2 ? 1 : 0;
+        const leftLeg = frame === 1 ? -2 : frame === 2 ? 2 : 0;
+        const rightLeg = -leftLeg;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(7, 26, 16, 4);
+
+        ctx.save();
+        ctx.translate(0, stepY);
+
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(10, 22 + leftLeg, 5, 6);
+        ctx.fillRect(16, 22 + rightLeg, 5, 6);
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillRect(11, 22 + leftLeg, 3, 4);
+        ctx.fillRect(17, 22 + rightLeg, 3, 4);
+
+        const capeColor = isRemote ? '#2563eb' : '#991b1b';
+        if (dir === 'N' || dir === 'E' || dir === 'W') {
+          ctx.fillStyle = capeColor;
+          ctx.fillRect(9, 12, 13, 11);
+        }
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(8, 11, 15, 12);
+        ctx.fillStyle = isRemote ? '#93c5fd' : '#cbd5e1';
+        ctx.fillRect(9, 12, 13, 10);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(10, 16, 11, 5);
+
+        if (dir !== 'N') {
+          ctx.fillStyle = '#eab308';
+          ctx.fillRect(14, 14, 3, 5);
+          ctx.fillRect(13, 15, 5, 2);
+        }
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(9, 2, 13, 10);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(10, 3, 11, 8);
+
+        if (dir === 'S') {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(12, 6, 7, 2);
+          ctx.fillRect(15, 5, 1, 5);
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(15, 3, 1, 2);
+        } else if (dir === 'E') {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(17, 6, 4, 2);
+        } else if (dir === 'W') {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(10, 6, 4, 2);
+        }
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(3, 6, 5, 14);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(4, 7, 3, 10);
+        ctx.fillStyle = '#eab308';
+        ctx.fillRect(2, 16, 7, 2);
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(21, 12, 8, 9);
+        ctx.fillStyle = isRemote ? '#38bdf8' : '#3b82f6';
+        ctx.fillRect(22, 13, 6, 7);
+
+        ctx.restore();
+        return this.toImage(c);
+      }
+
+      genOrcSprite(dir, frame, isWarlord = false) {
+        const { c, ctx } = this.createCanvas();
+        const stepY = frame === 1 ? -1 : frame === 2 ? 1 : 0;
+        const legOffset = frame === 1 ? -2 : frame === 2 ? 2 : 0;
+        const skinMain = isWarlord ? '#15803d' : '#4d7c0f';
+        const skinLight = isWarlord ? '#22c55e' : '#65a30d';
+
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(6, 26, 18, 4);
+
+        ctx.save();
+        ctx.translate(0, stepY);
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(9, 22 + legOffset, 5, 6);
+        ctx.fillRect(17, 22 - legOffset, 5, 6);
+        ctx.fillStyle = skinMain;
+        ctx.fillRect(10, 22 + legOffset, 3, 4);
+        ctx.fillRect(18, 22 - legOffset, 3, 4);
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(7, 10, 17, 13);
+        ctx.fillStyle = isWarlord ? '#7f1d1d' : '#78350f';
+        ctx.fillRect(8, 11, 15, 11);
+
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(9, 2, 13, 9);
+        ctx.fillStyle = skinLight;
+        ctx.fillRect(10, 3, 11, 7);
+
+        if (dir !== 'N') {
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(12, 5, 2, 2);
+          ctx.fillRect(17, 5, 2, 2);
+        }
+
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(3, 8, 3, 14);
+        ctx.fillStyle = '#09090b';
+        ctx.fillRect(1, 7, 8, 7);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(2, 8, 6, 5);
+
+        ctx.restore();
+        return this.toImage(c);
+      }
+
+      genPotionSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(13, 4, 6, 3);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(7, 11, 18, 17);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(9, 14, 14, 12);
+        ctx.fillStyle = '#fecaca';
+        ctx.fillRect(10, 15, 3, 5);
+        return this.toImage(c);
+      }
+
+      genSwordSprite(bladeColor, hiltColor, fiery = false) {
+        const { c, ctx } = this.createCanvas();
+        for (let i = 0; i < 16; i++) {
+          ctx.fillStyle = bladeColor;
+          ctx.fillRect(10 + i, 21 - i, 3, 3);
+        }
+        ctx.fillStyle = hiltColor;
+        ctx.fillRect(6, 20, 8, 2);
+        return this.toImage(c);
+      }
+
+      genAxeSprite() {
+        const { c, ctx } = this.createCanvas();
+        for (let i = 0; i < 20; i++) {
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(6 + i, 25 - i, 2, 2);
+        }
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(15, 5, 11, 11);
+        return this.toImage(c);
+      }
+
+      genShieldSprite(mainColor, trimColor) {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = trimColor;
+        ctx.fillRect(7, 5, 18, 22);
+        ctx.fillStyle = mainColor;
+        ctx.fillRect(9, 7, 14, 18);
+        return this.toImage(c);
+      }
+
+      genArmorSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(6, 6, 20, 20);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(9, 8, 14, 16);
+        return this.toImage(c);
+      }
+
+      genHelmetSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(8, 7, 16, 18);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(10, 14, 12, 3);
+        return this.toImage(c);
+      }
+
+      genGoldSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#eab308';
+        ctx.fillRect(10, 18, 8, 8);
+        ctx.fillRect(15, 12, 8, 8);
+        return this.toImage(c);
+      }
+
+      genChestSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#92400e';
+        ctx.fillRect(4, 7, 23, 7);
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(4, 15, 23, 11);
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(14, 13, 4, 5);
+        return this.toImage(c);
+      }
+
+      genCorpseSprite() {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#7f1d1d';
+        ctx.fillRect(5, 12, 22, 14);
+        ctx.fillStyle = '#3f6212';
+        ctx.fillRect(7, 11, 14, 11);
+        return this.toImage(c);
+      }
+
+      genBloodSprite(frame) {
+        const { c, ctx } = this.createCanvas();
+        ctx.fillStyle = '#dc2626';
+        if (frame === 0) {
+          ctx.fillRect(14, 14, 5, 5);
+          ctx.fillRect(10, 12, 3, 3);
+        } else {
+          ctx.fillRect(8, 9, 4, 4);
+          ctx.fillRect(21, 8, 4, 4);
+        }
+        return this.toImage(c);
+      }
+    }
+
+    /********************************************************************
+     * ALGORITMO PATHFINDING A* (Auto-Walk 8 Direções)
+     ********************************************************************/
+    class AStarPathfinder {
+      static findPath(startX, startY, goalX, goalY, worldMap, ignoreEntity = null, allowAdjacentIfBlocked = false) {
+        if (!worldMap.isBounds(goalX, goalY)) return [];
+        if (startX === goalX && startY === goalY) return [];
+
+        let targetX = goalX;
+        let targetY = goalY;
+        if (!worldMap.isWalkable(targetX, targetY, ignoreEntity)) {
+          if (!allowAdjacentIfBlocked) return [];
+          const bestAdj = this.findClosestAdjacentWalkable(startX, startY, goalX, goalY, worldMap, ignoreEntity);
+          if (!bestAdj) return [];
+          targetX = bestAdj.x;
+          targetY = bestAdj.y;
+          if (startX === targetX && startY === targetY) return [];
+        }
+
+        const key = (x, y) => `${x},${y}`;
+        const openList = [];
+        const openMap = new Map();
+        const closedSet = new Set();
+
+        const heuristic = (x1, y1, x2, y2) => {
+          const dx = Math.abs(x1 - x2);
+          const dy = Math.abs(y1 - y2);
+          return (dx + dy) + (1.414 - 2) * Math.min(dx, dy);
+        };
+
+        const startNode = {
+          x: startX,
+          y: startY,
+          g: 0,
+          h: heuristic(startX, startY, targetX, targetY),
+          f: heuristic(startX, startY, targetX, targetY),
+          parent: null
+        };
+
+        openList.push(startNode);
+        openMap.set(key(startX, startY), startNode);
+
+        const dirs = [
+          [0, -1, 1], [0, 1, 1], [-1, 0, 1], [1, 0, 1],
+          [-1, -1, 1.414], [1, -1, 1.414], [-1, 1, 1.414], [1, 1, 1.414]
+        ];
+
+        let iterations = 0;
+        const maxIterations = 1200;
+
+        while (openList.length > 0 && iterations < maxIterations) {
+          iterations++;
+          openList.sort((a, b) => a.f - b.f);
+          const current = openList.shift();
+          const cKey = key(current.x, current.y);
+          openMap.delete(cKey);
+          closedSet.add(cKey);
+
+          if (current.x === targetX && current.y === targetY) {
+            const path = [];
+            let curr = current;
+            while (curr.parent) {
+              path.unshift({ x: curr.x, y: curr.y });
+              curr = curr.parent;
+            }
+            return path;
+          }
+
+          for (const [dx, dy, cost] of dirs) {
+            const nx = current.x + dx;
+            const ny = current.y + dy;
+            const nKey = key(nx, ny);
+
+            if (closedSet.has(nKey)) continue;
+            if (!worldMap.isWalkable(nx, ny, ignoreEntity)) continue;
+
+            const gScore = current.g + cost;
+            const existing = openMap.get(nKey);
+
+            if (!existing || gScore < existing.g) {
+              const hScore = heuristic(nx, ny, targetX, targetY);
+              const node = {
+                x: nx,
+                y: ny,
+                g: gScore,
+                h: hScore,
+                f: gScore + hScore,
+                parent: current
+              };
+              if (!existing) {
+                openList.push(node);
+                openMap.set(nKey, node);
+              } else {
+                existing.g = gScore;
+                existing.f = gScore + hScore;
+                existing.parent = current;
+              }
+            }
+          }
+        }
+        return [];
+      }
+
+      static findClosestAdjacentWalkable(startX, startY, goalX, goalY, worldMap, ignoreEntity) {
+        const neighbors = [];
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const nx = goalX + dx;
+            const ny = goalY + dy;
+            if (worldMap.isWalkable(nx, ny, ignoreEntity) || (nx === startX && ny === startY)) {
+              const dist = Math.hypot(nx - startX, ny - startY);
+              neighbors.push({ x: nx, y: ny, dist });
+            }
+          }
+        }
+        neighbors.sort((a, b) => a.dist - b.dist);
+        return neighbors[0] || null;
+      }
+    }
+
+    /********************************************************************
+     * CLASSE REMOTE PLAYER (Outros jogadores conectados ao Render)
+     ********************************************************************/
+    class RemotePlayer {
+      constructor({ id, name, level = 1, x = 7, y = 7, direction = 'S', hp = 150, maxHp = 150, vocation = 'Elite Knight' }) {
+        this.id = id;
+        this.name = name;
+        this.level = level;
+        this.x = x;
+        this.y = y;
+        this.renderX = x * 32;
+        this.renderY = y * 32;
+        this.startX = x * 32;
+        this.startY = y * 32;
+        this.moveStartTime = 0;
+        this.speed = 240;
+        this.isMoving = false;
+        this.direction = direction;
+        this.animFrame = 0;
+        this.hp = hp;
+        this.maxHp = maxHp;
+        this.vocation = vocation;
+      }
+
+      receiveMovePacket(nx, ny, direction) {
+        this.direction = direction || this.direction;
+        this.startX = this.renderX;
+        this.startY = this.renderY;
+        this.x = nx;
+        this.y = ny;
+        this.isMoving = true;
+        this.moveStartTime = performance.now();
+      }
+
+      update(now) {
+        if (this.isMoving) {
+          const elapsed = now - this.moveStartTime;
+          const progress = Math.min(1, elapsed / this.speed);
+          const targetX = this.x * 32;
+          const targetY = this.y * 32;
+          this.renderX = this.startX + (targetX - this.startX) * progress;
+          this.renderY = this.startY + (targetY - this.startY) * progress;
+          this.animFrame = progress < 0.5 ? 1 : 2;
+          if (progress >= 1) {
+            this.renderX = targetX;
+            this.renderY = targetY;
+            this.isMoving = false;
+            this.animFrame = 0;
+          }
+        }
+      }
+    }
+
+    /********************************************************************
+     * GERENCIADOR DE REDE WEBSOCKET (Render.com Online WS Protocol)
+     ********************************************************************/
+    class NetworkManager {
+      constructor(gameInstance) {
+        this.game = gameInstance;
+        this.ws = null;
+        this.connected = false;
+        this.txCount = 0;
+        this.rxCount = 0;
+        this.remotePlayers = new Map();
+        this.defaultUrl = 'wss://server-mmo.onrender.com';
+      }
+
+      connect(serverUrl) {
+        const url = serverUrl || this.defaultUrl;
+        this.game.addLog(`[WS] Conectando ao servidor: ${url}...`, '#93c5fd');
+        const badge = document.getElementById('account-status-badge');
+        if (badge) badge.textContent = 'WS: Conectando...';
+
+        try {
+          if (this.ws) {
+            this.ws.close();
+          }
+
+          this.ws = new WebSocket(url);
+
+          this.ws.onopen = () => {
+            this.connected = true;
+            this.game.addLog('[WS] Conexão estabelecida com o servidor!', '#4ade80');
+            const dot = document.getElementById('online-dot');
+            if (dot) dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+            if (badge) badge.textContent = 'Servidor: Online';
+
+            const modalBadge = document.getElementById('db
