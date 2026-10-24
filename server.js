@@ -1,7 +1,6 @@
 /**
  * TIBIA 7.4 CLASSIC - MULTIPLAYER WEBSOCKET & STATIC SERVER (MAX 5 PLAYERS)
- * Serve automaticamente index.html e qualquer arquivo estático (.css, .js, .png)
- * na raiz ou na pasta /public, além de gerenciar contas em database.json.
+ * Configurado especificamente para o proxy reverso do Render.com (0.0.0.0 + Keep-Alive)
  */
 
 const http = require('http');
@@ -48,22 +47,32 @@ function saveDatabase(db) {
 let db = loadDatabase();
 const activePlayers = new Map();
 
-// --- 2. SERVIDOR HTTP DE ARQUIVOS ESTÁTICOS (Suporta Módulos e Imagens) ---
+// --- 2. SERVIDOR HTTP DE ARQUIVOS ESTÁTICOS + HEALTHCHECK DO RENDER ---
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.url === '/status') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  let safeUrl = (req.url || '/').split('?')[0];
+
+  if (safeUrl === '/status' || safeUrl === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       status: 'online',
       server: 'Tibia 7.4 Remastered Server',
       connectedPlayers: activePlayers.size,
-      maxPlayers: MAX_PLAYERS
+      maxPlayers: MAX_PLAYERS,
+      uptime: Math.floor(process.uptime())
     }));
     return;
   }
 
-  let safeUrl = req.url.split('?')[0];
   if (safeUrl === '/') safeUrl = '/index.html';
 
   // Procura primeiro em /public, depois na raiz do repositório
@@ -75,11 +84,14 @@ const server = http.createServer((req, res) => {
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
     fs.createReadStream(filePath).pipe(res);
   } else {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('404 - Arquivo não encontrado no servidor Tibia 7.4');
+    res.end('404 - Arquivo nao encontrado no servidor Tibia 7.4');
   }
 });
 
@@ -95,7 +107,12 @@ function broadcast(packet, excludeWs = null) {
   }
 }
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
+
+  console.log(`[WS] Nova conexão recebida (${activePlayers.size + 1}/${MAX_PLAYERS})`);
+
   if (activePlayers.size >= MAX_PLAYERS) {
     ws.send(JSON.stringify({
       type: 'SERVER_ERROR',
@@ -104,6 +121,13 @@ wss.on('connection', (ws) => {
     ws.close();
     return;
   }
+
+  // Envia confirmação imediata de handshake ao cliente
+  ws.send(JSON.stringify({
+    type: 'SERVER_HELLO',
+    onlineCount: activePlayers.size,
+    maxPlayers: MAX_PLAYERS
+  }));
 
   let authenticatedAccount = null;
 
@@ -126,13 +150,19 @@ wss.on('connection', (ws) => {
       }
       activePlayers.delete(ws);
       broadcast({ type: 'PLAYER_LEAVE', id: player.id, name: player.name });
+      console.log(`[WS] Jogador desconectou: ${player.name}`);
     }
   });
 
   function handlePacket(socket, pkt) {
     switch (pkt.type) {
+      case 'PING': {
+        socket.send(JSON.stringify({ type: 'PONG', t: Date.now() }));
+        break;
+      }
+
       case 'AUTH_LOGIN': {
-        const username = (pkt.username || '').trim().toLowerCase();
+        const username = (pkt.username || 'player1').trim().toLowerCase();
         const password = pkt.password || '';
         db = loadDatabase();
         let acc = db.accounts[username];
@@ -166,6 +196,7 @@ wss.on('connection', (ws) => {
         }));
 
         broadcast({ type: 'PLAYER_JOIN', player: char }, socket);
+        console.log(`[LOGIN] ${char.name} entrou no mundo (${activePlayers.size}/${MAX_PLAYERS})`);
         break;
       }
 
@@ -177,7 +208,7 @@ wss.on('connection', (ws) => {
         db = loadDatabase();
 
         if (db.accounts[username]) {
-          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Conta já existe!' }));
+          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Conta ja existe!' }));
           return;
         }
 
@@ -252,12 +283,21 @@ wss.on('connection', (ws) => {
   }
 });
 
+// Heartbeat a cada 25s para o proxy do Render não encerrar conexões ociosas
+setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 25000);
+
 function createDefaultCharacter(accountName, name, vocation = 'Elite Knight') {
   return {
     accountName,
     name: name || 'Knight Hero',
     vocation,
-    x: 14, // Nasce no Templo de Thais-Mini
+    x: 14,
     y: 14,
     direction: 'S',
     hp: vocation === 'Master Sorcerer' ? 120 : 165,
@@ -271,6 +311,7 @@ function createDefaultCharacter(accountName, name, vocation = 'Elite Knight') {
   };
 }
 
-server.listen(PORT, () => {
-  console.log(`⚔️ TIBIA 7.4 REMASTERED SERVER ONLINE NA PORTA ${PORT}`);
+// Importante no Render: escutar explicitamente em 0.0.0.0
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`⚔️ TIBIA 7.4 REMASTERED SERVER ONLINE NA PORTA ${PORT} (0.0.0.0)`);
 });

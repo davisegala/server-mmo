@@ -134,7 +134,7 @@
           <div class="text-[11px] text-neutral-300 mt-0.5">NPCs (Sam, Xodet, Quentin), Lojas & Iluminação Dinâmica</div>
         </div>
         <div class="text-right font-mono text-[10px] text-emerald-400">
-          <div>v2.0 Modular</div>
+          <div>v2.1 Render Fix</div>
           <div>Max 5 Players</div>
         </div>
       </div>
@@ -142,7 +142,7 @@
       <div class="tibia-inset p-2 mb-2 bg-[#171717] flex items-center justify-between gap-2">
         <label class="text-[10px] text-neutral-400 whitespace-nowrap">WebSocket:</label>
         <input id="server-ws-url" type="text" value="wss://server-mmorpg.onrender.com" class="tibia-inset flex-1 px-1.5 py-0.5 text-[11px] text-amber-300 bg-[#0d0d0d] font-mono focus:outline-none" />
-        <button type="button" id="btn-reconnect-server" class="tibia-btn text-[10px] py-0.5 px-2">Reconectar</button>
+        <button type="button" id="btn-reconnect-server" class="tibia-btn text-[10px] py-0.5 px-2">Testar / Reconectar</button>
       </div>
 
       <div class="flex gap-1 mb-2">
@@ -175,10 +175,10 @@
           </div>
         </div>
 
-        <div id="auth-feedback" class="text-[11px] text-amber-300 min-h-[16px] font-mono"></div>
+        <div id="auth-feedback" class="text-[11px] text-amber-300 min-h-[16px] font-mono">Inicializando cliente...</div>
 
         <div class="flex items-center justify-between gap-2 pt-1">
-          <button type="submit" class="tibia-btn flex-1 py-1.5 text-emerald-300">Conectar ao Servidor</button>
+          <button type="submit" id="btn-submit-login" class="tibia-btn flex-1 py-1.5 text-emerald-300">Conectar ao Servidor</button>
           <button type="button" id="btn-quick-guest" class="tibia-btn py-1.5 px-3 text-amber-300">⚡ Jogar Offline</button>
         </div>
       </form>
@@ -222,7 +222,7 @@
 
         <div class="w-full mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-300 bg-[#262626] px-2.5 py-1.5 border border-[#161616]">
           <div>
-            <span class="text-amber-400 font-semibold">Dica:</span> Clique Direito em <b>Sam</b> (Ferreiro), <b>Xodet</b> (Poções) ou <b>Quentin</b> (Cura) — ou digite <b>"hi"</b> / <b>"trade"</b>!
+            <span class="text-amber-400 font-semibold">Dica:</span> Clique em <b>Sam</b> (Ferreiro), <b>Xodet</b> (Poções) ou <b>Quentin</b> (Cura) — ou digite <b>"hi"</b> / <b>"trade"</b>!
           </div>
           <div class="flex items-center gap-1 ml-auto">
             <button data-move="NW" class="tibia-btn px-1.5 py-0.5">↖</button>
@@ -389,18 +389,19 @@
     }
 
     /********************************************************************
-     * MÓDULO 2: GERADOR DE SPRITES HD + OUTLINE PRETO 1PX (graphics/SpriteSheet.js)
+     * MÓDULO 2: GERADOR DE SPRITES SÍNCRONO + DATAURL (Evita Race Condition)
      ********************************************************************/
     class SpriteCatalog {
       constructor() {
-        this.images = {};
+        this.canvases = {};
+        this.dataUrls = {};
       }
-      make(drawFn, addBlackOutline = false) {
+      make(key, drawFn, addBlackOutline = false) {
         const c = document.createElement('canvas');
         c.width = 32; c.height = 32;
         const ctx = c.getContext('2d');
         ctx.imageSmoothingEnabled = false;
-        drawFn(ctx);
+        drawFn(ctx, this.canvases);
 
         if (addBlackOutline) {
           const src = ctx.getImageData(0, 0, 32, 32);
@@ -426,14 +427,15 @@
           ctx.putImageData(dst, 0, 0);
         }
 
-        const img = new Image();
-        img.src = c.toDataURL('image/png');
-        return img;
+        this.canvases[key] = c;
+        this.dataUrls[key] = c.toDataURL('image/png');
       }
 
+      getCanvas(key) { return this.canvases[key]; }
+      getUrl(key) { return this.dataUrls[key] || ''; }
+
       generateAll() {
-        // 1. Pisos da Cidade, Templo, Floresta, Água e Caverna
-        this.images['tile_grass'] = this.make(ctx => {
+        this.make('tile_grass', ctx => {
           ctx.fillStyle = '#254d1e'; ctx.fillRect(0, 0, 32, 32);
           const shades = ['#1f4219', '#2b5923', '#326629', '#1b3816'];
           for (let y = 0; y < 32; y += 2) {
@@ -445,7 +447,7 @@
           ctx.fillStyle = '#407a36'; ctx.fillRect(6, 8, 2, 1); ctx.fillRect(22, 19, 2, 1);
         });
 
-        this.images['tile_cobble'] = this.make(ctx => {
+        this.make('tile_cobble', ctx => {
           ctx.fillStyle = '#575551'; ctx.fillRect(0, 0, 32, 32);
           const stones = [[1,1,14,14,'#6e6b66'], [16,1,15,14,'#63605b'], [1,16,15,15,'#5e5c57'], [17,16,14,15,'#6b6863']];
           stones.forEach(([x,y,w,h,col]) => {
@@ -456,7 +458,7 @@
           ctx.fillRect(0, 15, 32, 1); ctx.fillRect(15, 0, 1, 32);
         });
 
-        this.images['tile_temple'] = this.make(ctx => {
+        this.make('tile_temple', ctx => {
           for (let y = 0; y < 32; y += 16) {
             for (let x = 0; x < 32; x += 16) {
               const light = ((x + y) / 16) % 2 === 0;
@@ -469,7 +471,7 @@
           ctx.strokeStyle = '#334155'; ctx.strokeRect(0, 0, 32, 32);
         });
 
-        this.images['tile_wood'] = this.make(ctx => {
+        this.make('tile_wood', ctx => {
           ctx.fillStyle = '#5c3a21'; ctx.fillRect(0, 0, 32, 32);
           for (let y = 0; y < 32; y += 8) {
             ctx.fillStyle = y % 16 === 0 ? '#694226' : '#52331c';
@@ -478,14 +480,14 @@
           }
         });
 
-        this.images['tile_stone'] = this.make(ctx => {
+        this.make('tile_stone', ctx => {
           ctx.fillStyle = '#393b40'; ctx.fillRect(0, 0, 32, 32);
           ctx.fillStyle = '#474a50'; ctx.fillRect(2, 2, 12, 12); ctx.fillRect(16, 16, 14, 14);
           ctx.fillStyle = '#232428'; ctx.fillRect(0, 15, 32, 2); ctx.fillRect(15, 0, 2, 32);
         });
 
         for (let f = 0; f < 2; f++) {
-          this.images['tile_water_' + f] = this.make(ctx => {
+          this.make('tile_water_' + f, ctx => {
             ctx.fillStyle = '#1e3a8a'; ctx.fillRect(0, 0, 32, 32);
             ctx.fillStyle = '#1d4ed8'; ctx.fillRect(0, 4 + f * 3, 32, 8); ctx.fillRect(0, 18 - f * 3, 32, 8);
             ctx.fillStyle = '#60a5fa';
@@ -494,8 +496,7 @@
           });
         }
 
-        // 2. Paredes, Árvores, Tochas e Objetos
-        this.images['wall_brick'] = this.make(ctx => {
+        this.make('wall_brick', ctx => {
           ctx.fillStyle = '#141416'; ctx.fillRect(0, 0, 32, 32);
           ctx.fillStyle = '#7c808a'; ctx.fillRect(1, 1, 30, 9);
           ctx.fillStyle = '#565961'; ctx.fillRect(1, 11, 30, 20);
@@ -504,14 +505,14 @@
           ctx.fillRect(15, 11, 2, 9); ctx.fillRect(8, 21, 2, 10); ctx.fillRect(23, 21, 2, 10);
         });
 
-        this.images['wall_torch'] = this.make(ctx => {
-          ctx.drawImage(this.images['wall_brick'], 0, 0);
+        this.make('wall_torch', (ctx, canvases) => {
+          ctx.drawImage(canvases['wall_brick'], 0, 0);
           ctx.fillStyle = '#451a03'; ctx.fillRect(14, 15, 4, 9);
           ctx.fillStyle = '#f97316'; ctx.fillRect(13, 10, 6, 6);
           ctx.fillStyle = '#fde047'; ctx.fillRect(14, 11, 4, 4);
         });
 
-        this.images['obj_tree'] = this.make(ctx => {
+        this.make('obj_tree', ctx => {
           ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(8, 25, 16, 5);
           ctx.fillStyle = '#5c3a21'; ctx.fillRect(13, 18, 6, 10);
           ctx.fillStyle = '#166534'; ctx.fillRect(5, 5, 22, 16);
@@ -519,33 +520,28 @@
           ctx.fillStyle = '#22c55e'; ctx.fillRect(9, 5, 6, 5); ctx.fillRect(17, 8, 5, 5);
         }, true);
 
-        this.images['obj_fountain'] = this.make(ctx => {
+        this.make('obj_fountain', ctx => {
           ctx.fillStyle = '#64748b'; ctx.fillRect(3, 8, 26, 20);
           ctx.fillStyle = '#0284c7'; ctx.fillRect(6, 11, 20, 14);
           ctx.fillStyle = '#7dd3fc'; ctx.fillRect(13, 6, 6, 12);
           ctx.fillStyle = '#e0f2fe'; ctx.fillRect(14, 5, 4, 5);
         }, true);
 
-        // 3. Sprites de Criaturas com Direções e Frames (Herói, NPCs e Monstros)
         const dirs = ['N', 'S', 'W', 'E'];
         dirs.forEach(dir => {
           for (let step = 0; step < 3; step++) {
             const legOffset = step === 1 ? -2 : step === 2 ? 2 : 0;
-            this.images[`spr_player_${dir}_${step}`] = this.make(ctx => {
+            this.make(`spr_player_${dir}_${step}`, ctx => {
               ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(8, 26, 16, 4);
-              // Pernas com animação de passo
               ctx.fillStyle = '#334155';
               ctx.fillRect(10, 21 + (legOffset > 0 ? -1 : 0), 5, 6);
               ctx.fillRect(17, 21 + (legOffset < 0 ? -1 : 0), 5, 6);
-              // Capa e Armadura
               ctx.fillStyle = '#991b1b'; ctx.fillRect(8, 11, 16, 12);
               ctx.fillStyle = '#cbd5e1'; ctx.fillRect(9, 11, 14, 10);
-              // Cabeça/Elmo
               ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10, 3, 12, 9);
               if (dir !== 'N') {
                 ctx.fillStyle = '#0f172a'; ctx.fillRect(12, 6, 8, 2);
               }
-              // Espada e Escudo conforme direção
               ctx.fillStyle = '#f8fafc';
               if (dir === 'W') ctx.fillRect(3, 9, 6, 3);
               else if (dir === 'E') ctx.fillRect(23, 9, 6, 3);
@@ -554,7 +550,7 @@
               ctx.fillStyle = '#3b82f6'; ctx.fillRect(23, 13, 4, 6);
             }, true);
 
-            this.images[`spr_orc_${dir}_${step}`] = this.make(ctx => {
+            this.make(`spr_orc_${dir}_${step}`, ctx => {
               ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(8, 26, 16, 4);
               ctx.fillStyle = '#3f6212';
               ctx.fillRect(10, 21 + (legOffset > 0 ? -1 : 0), 5, 6);
@@ -569,7 +565,7 @@
           }
         });
 
-        this.images['spr_warlord'] = this.make(ctx => {
+        this.make('spr_warlord', ctx => {
           ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(6, 26, 20, 4);
           ctx.fillStyle = '#7f1d1d'; ctx.fillRect(7, 10, 18, 15);
           ctx.fillStyle = '#4d7c0f'; ctx.fillRect(9, 3, 14, 9);
@@ -578,56 +574,55 @@
           ctx.fillStyle = '#e2e8f0'; ctx.fillRect(2, 6, 5, 14);
         }, true);
 
-        this.images['spr_npc_sam'] = this.make(ctx => {
+        this.make('spr_npc_sam', ctx => {
           ctx.fillStyle = '#451a03'; ctx.fillRect(8, 11, 16, 14);
           ctx.fillStyle = '#fcd34d'; ctx.fillRect(10, 3, 12, 9);
-          ctx.fillStyle = '#92400e'; ctx.fillRect(10, 9, 12, 5); // Barba de ferreiro
+          ctx.fillStyle = '#92400e'; ctx.fillRect(10, 9, 12, 5);
           ctx.fillStyle = '#94a3b8'; ctx.fillRect(3, 8, 4, 10);
         }, true);
 
-        this.images['spr_npc_xodet'] = this.make(ctx => {
+        this.make('spr_npc_xodet', ctx => {
           ctx.fillStyle = '#4c1d95'; ctx.fillRect(8, 11, 16, 15);
           ctx.fillStyle = '#fde68a'; ctx.fillRect(10, 4, 12, 8);
           ctx.fillStyle = '#6d28d9'; ctx.fillRect(8, 1, 16, 4);
           ctx.fillStyle = '#38bdf8'; ctx.fillRect(4, 6, 3, 16);
         }, true);
 
-        this.images['spr_npc_quentin'] = this.make(ctx => {
+        this.make('spr_npc_quentin', ctx => {
           ctx.fillStyle = '#f59e0b'; ctx.fillRect(8, 11, 16, 15);
           ctx.fillStyle = '#fef08a'; ctx.fillRect(10, 4, 12, 8);
           ctx.fillStyle = '#fef9c3'; ctx.fillRect(13, 13, 6, 9);
         }, true);
 
-        this.images['spr_remote'] = this.make(ctx => {
+        this.make('spr_remote', ctx => {
           ctx.fillStyle = '#1d4ed8'; ctx.fillRect(8, 11, 16, 14);
           ctx.fillStyle = '#93c5fd'; ctx.fillRect(10, 3, 12, 9);
           ctx.fillStyle = '#facc15'; ctx.fillRect(4, 7, 3, 12);
         }, true);
 
-        // 4. Ícones de Itens com Outline Clássico
-        this.images['item_potion'] = this.make(ctx => {
+        this.make('item_potion', ctx => {
           ctx.fillStyle = '#d97706'; ctx.fillRect(13, 5, 6, 3);
           ctx.fillStyle = '#ef4444'; ctx.fillRect(8, 10, 16, 16);
           ctx.fillStyle = '#fca5a5'; ctx.fillRect(10, 12, 4, 5);
         }, true);
 
-        this.images['item_mana_potion'] = this.make(ctx => {
+        this.make('item_mana_potion', ctx => {
           ctx.fillStyle = '#d97706'; ctx.fillRect(13, 5, 6, 3);
           ctx.fillStyle = '#2563eb'; ctx.fillRect(8, 10, 16, 16);
           ctx.fillStyle = '#93c5fd'; ctx.fillRect(10, 12, 4, 5);
         }, true);
 
-        this.images['item_sword'] = this.make(ctx => {
+        this.make('item_sword', ctx => {
           for (let i = 0; i < 15; i++) { ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10 + i, 21 - i, 3, 3); }
           ctx.fillStyle = '#eab308'; ctx.fillRect(6, 20, 8, 3);
         }, true);
 
-        this.images['item_spike_sword'] = this.make(ctx => {
+        this.make('item_spike_sword', ctx => {
           for (let i = 0; i < 16; i++) { ctx.fillStyle = '#38bdf8'; ctx.fillRect(10 + i, 21 - i, 3, 3); }
           ctx.fillStyle = '#facc15'; ctx.fillRect(6, 19, 9, 4);
         }, true);
 
-        this.images['item_fire_sword'] = this.make(ctx => {
+        this.make('item_fire_sword', ctx => {
           for (let i = 0; i < 16; i++) {
             ctx.fillStyle = i % 2 === 0 ? '#f97316' : '#fde047';
             ctx.fillRect(10 + i, 21 - i, 4, 4);
@@ -635,44 +630,44 @@
           ctx.fillStyle = '#dc2626'; ctx.fillRect(6, 19, 9, 4);
         }, true);
 
-        this.images['item_shield'] = this.make(ctx => {
+        this.make('item_shield', ctx => {
           ctx.fillStyle = '#eab308'; ctx.fillRect(7, 5, 18, 22);
           ctx.fillStyle = '#64748b'; ctx.fillRect(9, 7, 14, 18);
         }, true);
 
-        this.images['item_crown_shield'] = this.make(ctx => {
+        this.make('item_crown_shield', ctx => {
           ctx.fillStyle = '#facc15'; ctx.fillRect(6, 5, 20, 22);
           ctx.fillStyle = '#dc2626'; ctx.fillRect(9, 8, 14, 16);
           ctx.fillStyle = '#fde047'; ctx.fillRect(13, 12, 6, 6);
         }, true);
 
-        this.images['item_armor'] = this.make(ctx => {
+        this.make('item_armor', ctx => {
           ctx.fillStyle = '#94a3b8'; ctx.fillRect(6, 6, 20, 20);
           ctx.fillStyle = '#e2e8f0'; ctx.fillRect(9, 8, 14, 16);
         }, true);
 
-        this.images['item_helmet'] = this.make(ctx => {
+        this.make('item_helmet', ctx => {
           ctx.fillStyle = '#cbd5e1'; ctx.fillRect(8, 7, 16, 18);
           ctx.fillStyle = '#0f172a'; ctx.fillRect(10, 14, 12, 3);
         }, true);
 
-        this.images['item_gold'] = this.make(ctx => {
+        this.make('item_gold', ctx => {
           ctx.fillStyle = '#ca8a04'; ctx.fillRect(8, 16, 10, 10);
           ctx.fillStyle = '#facc15'; ctx.fillRect(13, 10, 10, 10);
         }, true);
 
-        this.images['obj_chest'] = this.make(ctx => {
+        this.make('obj_chest', ctx => {
           ctx.fillStyle = '#92400e'; ctx.fillRect(4, 7, 24, 8);
           ctx.fillStyle = '#78350f'; ctx.fillRect(4, 15, 24, 11);
           ctx.fillStyle = '#facc15'; ctx.fillRect(14, 13, 4, 5);
         }, true);
 
-        this.images['obj_corpse'] = this.make(ctx => {
+        this.make('obj_corpse', ctx => {
           ctx.fillStyle = '#7f1d1d'; ctx.fillRect(5, 13, 22, 13);
           ctx.fillStyle = '#3f6212'; ctx.fillRect(8, 11, 14, 11);
         }, true);
 
-        this.images['fx_blood'] = this.make(ctx => {
+        this.make('fx_blood', ctx => {
           ctx.fillStyle = '#dc2626';
           ctx.fillRect(13, 13, 6, 6); ctx.fillRect(8, 9, 4, 4); ctx.fillRect(19, 17, 4, 4);
         });
@@ -752,28 +747,21 @@
             let pz = false;
 
             const isBorder = x === 0 || y === 0 || x === this.width - 1 || y === this.height - 1;
-
-            // Rio ao Sul da Cidade
             const isRiver = y >= 24 && y <= 26 && (x < 13 || x > 16);
 
-            // Cidade Murada de Thais-Mini (x: 4..23, y: 4..21)
             const inCity = x >= 4 && x <= 23 && y >= 4 && y <= 21;
             const isCityWall = inCity && (x === 4 || x === 23 || y === 4 || y === 21) &&
               !((x === 23 && (y === 12 || y === 13)) || (y === 21 && (x === 14 || x === 15)));
 
-            // Templo Central (Protection Zone - x: 11..17, y: 11..16)
-            const inTemple = x >= 11 && x <= 17 && y >= 11 && y <= 16;
+            const inTemple = x >= 11 && x <= 17 && y >= 11 && y >= 16;
             const isTempleWall = inTemple && (x === 11 || x === 17 || y === 11 || y === 16) && !(y === 16 && x === 14);
 
-            // Ferraria do Sam (Oeste - x: 6..9, y: 6..11)
             const inSmith = x >= 6 && x <= 9 && y >= 6 && y <= 11;
             const isSmithWall = inSmith && (x === 6 || x === 9 || y === 6 || y === 11) && !(x === 9 && y === 9);
 
-            // Loja de Magia do Xodet (Sul - x: 6..10, y: 15..19)
             const inMagic = x >= 6 && x <= 10 && y >= 15 && y <= 19;
             const isMagicWall = inMagic && (x === 6 || x === 10 || y === 15 || y === 19) && !(x === 10 && y === 17);
 
-            // Calabouço de Pedra dos Orcs (Leste - x: 29..40, y: 5..20)
             const inDungeon = x >= 29 && x <= 40 && y >= 5 && y <= 20;
             const isDungeonWall = inDungeon && (x === 29 || x === 40 || y === 5 || y === 20) && !(x === 29 && (y === 12 || y === 13));
 
@@ -788,7 +776,6 @@
               if (wall === 'wall_torch') this.lights.push({ x, y, radius: 115, color: 'rgba(251, 146, 60, 0.35)' });
             }
 
-            // Árvores na floresta
             if (!wall && ground === 'tile_grass' && !inCity && ((x * 19 + y * 31) % 23 === 0) && x > 24) {
               wall = 'obj_tree';
             }
@@ -798,11 +785,9 @@
           }
         }
 
-        // Fonte na Praça Central da Cidade
         this.tiles[9][14].wall = 'obj_fountain';
         this.tiles[9][14].walkable = false;
 
-        // Baú de Recompensa na Fortaleza dos Orcs
         const chest = createItemInstance('item_gold', 1);
         chest.id = 'obj_chest'; chest.name = 'Baú Real dos Orcs'; chest.spriteId = 'obj_chest';
         chest.type = 'container'; chest.pickupable = false;
@@ -813,7 +798,6 @@
         ];
         this.tiles[8][38].items.push(chest);
 
-        // NPCs da Cidade de Thais-Mini
         this.npcs.push(new NPC({
           id: 'npc_quentin', name: 'Quentin (Monge)', role: 'Templo & Cura', x: 14, y: 12,
           spriteId: 'spr_npc_quentin',
@@ -835,7 +819,6 @@
           shopItems: ['item_potion', 'item_mana_potion']
         }));
 
-        // Spawns de Monstros fora dos portões da cidade e na Dungeon
         const spawns = [
           [25, 10, 'Orc Spearman', 70, 12, 40],
           [26, 15, 'Orc Warrior', 90, 15, 55],
@@ -861,7 +844,7 @@
         if (!this.isBounds(x, y)) return false;
         const tile = this.tiles[y][x];
         if (!tile.walkable) return false;
-        if (isMonster && tile.pz) return false; // Monstros não entram no Templo/Lojas (PZ)
+        if (isMonster && tile.pz) return false;
         for (const npc of this.npcs) {
           if (npc.x === x && npc.y === y) return false;
         }
@@ -879,7 +862,7 @@
       constructor() {
         this.name = 'Knight Hero';
         this.vocation = 'Elite Knight';
-        this.x = 14; this.y = 14; // Inicia no Templo de Thais
+        this.x = 14; this.y = 14;
         this.renderX = 14 * 32; this.renderY = 14 * 32;
         this.startX = 14 * 32; this.startY = 14 * 32;
         this.direction = 'S';
@@ -971,20 +954,32 @@
         this.ws = null;
         this.connected = false;
         this.authMode = 'login';
+        this.pendingLoginRequest = null;
 
         this.bindUI();
         this.updateUI();
         this.addLog('Bem-vindo à Cidade de Thais! Fale com Quentin no Templo, Sam na Ferraria (Oeste) ou Xodet (Sul).', '#fde047');
 
-        // Auto-detecta o endereço WebSocket se estiver rodando no Render
+        // Auto-detecta o endereço WebSocket se estiver no Render ou HTTPS
+        const wsInput = document.getElementById('server-ws-url');
         if (window.location.hostname.includes('onrender.com')) {
-          document.getElementById('server-ws-url').value = `wss://${window.location.host}`;
+          const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          wsInput.value = `${proto}//${window.location.host}`;
         }
-        this.connectWebSocket(document.getElementById('server-ws-url').value);
+        this.connectWebSocket(wsInput.value);
 
         this.lastCombatTick = performance.now();
         this.lastMonsterTick = performance.now();
         requestAnimationFrame(t => this.loop(t));
+      }
+
+      normalizeWsUrl(rawUrl) {
+        let u = (rawUrl || '').trim();
+        if (!u) return 'wss://server-mmorpg.onrender.com';
+        if (u.startsWith('https://')) u = 'wss://' + u.slice(8);
+        else if (u.startsWith('http://')) u = 'ws://' + u.slice(7);
+        else if (!u.startsWith('ws://') && !u.startsWith('wss://')) u = 'wss://' + u;
+        return u.replace(/\/+$/, '');
       }
 
       addLog(text, color = '#d8d8d8') {
@@ -996,15 +991,30 @@
         log.scrollTop = log.scrollHeight;
       }
 
-      connectWebSocket(url) {
+      async connectWebSocket(rawUrl) {
+        const url = this.normalizeWsUrl(rawUrl);
+        document.getElementById('server-ws-url').value = url;
+
         const modalBadge = document.getElementById('db-conn-badge');
         const topBadge = document.getElementById('account-status-badge');
         const feedback = document.getElementById('auth-feedback');
+
         modalBadge.textContent = 'Conectando ao Render...';
+        modalBadge.className = 'text-[10px] text-amber-300 font-mono';
         topBadge.textContent = 'WS: Conectando...';
+        feedback.textContent = `Conectando em ${url}...`;
+
+        // Faz um ping HTTP rápido em /status para acordar o Render e diagnosticar
+        try {
+          const httpUrl = url.replace(/^wss:/, 'https:').replace(/^ws:/, 'http:') + '/status';
+          fetch(httpUrl).catch(() => {});
+        } catch (e) {}
 
         try {
-          if (this.ws) this.ws.close();
+          if (this.ws) {
+            this.ws.onclose = null;
+            this.ws.close();
+          }
           this.ws = new WebSocket(url);
 
           this.ws.onopen = () => {
@@ -1013,7 +1023,14 @@
             modalBadge.className = 'text-[10px] text-emerald-400 font-mono font-bold';
             topBadge.textContent = 'Render: Online';
             document.getElementById('online-dot').className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
-            feedback.textContent = 'Servidor conectado! Clique em "Conectar ao Servidor".';
+            feedback.textContent = '✅ Servidor conectado! Clique em "Conectar ao Servidor".';
+
+            // Se o usuário já tinha clicado em "Conectar ao Servidor", autentica na hora!
+            if (this.pendingLoginRequest) {
+              const pkt = this.pendingLoginRequest;
+              this.pendingLoginRequest = null;
+              this.sendPacket(pkt);
+            }
           };
 
           this.ws.onmessage = (ev) => {
@@ -1022,13 +1039,21 @@
           };
 
           this.ws.onerror = () => {
-            modalBadge.textContent = 'Modo Local Disponível';
-            feedback.textContent = 'Você pode clicar em "⚡ Jogar Offline" para entrar imediatamente!';
+            modalBadge.textContent = 'Aguardando Render...';
+            feedback.textContent = 'Aguardando resposta WebSocket do Render (ou clique em ⚡ Jogar Offline).';
           };
 
           this.ws.onclose = () => {
             this.connected = false;
-            topBadge.textContent = 'Modo Local';
+            topBadge.textContent = 'Reconectando...';
+            modalBadge.textContent = 'Reconectando...';
+            // Tenta reconectar automaticamente após 3 segundos se ainda estiver no modal
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = setTimeout(() => {
+              if (!this.connected) {
+                this.connectWebSocket(document.getElementById('server-ws-url').value);
+              }
+            }, 3500);
           };
         } catch (e) {
           feedback.textContent = 'Clique em "⚡ Jogar Offline" para iniciar imediatamente.';
@@ -1038,11 +1063,15 @@
       sendPacket(pkt) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           this.ws.send(JSON.stringify(pkt));
+          return true;
         }
+        return false;
       }
 
       handleServerPacket(pkt) {
-        if (pkt.type === 'AUTH_RESULT') {
+        if (pkt.type === 'SERVER_HELLO') {
+          document.getElementById('online-players-count').textContent = `${pkt.onlineCount}/${pkt.maxPlayers} Online`;
+        } else if (pkt.type === 'AUTH_RESULT') {
           if (!pkt.success) {
             document.getElementById('auth-feedback').textContent = pkt.message || 'Erro no login';
             return;
@@ -1061,7 +1090,7 @@
           (pkt.otherPlayers || []).forEach(p => this.remotePlayers.set(p.id, p));
           document.getElementById('online-players-count').textContent = `${1 + this.remotePlayers.size}/5 Online`;
           document.getElementById('account-modal').classList.add('hidden');
-          this.addLog(`Conectado ao servidor como ${this.player.name}!`, '#4ade80');
+          this.addLog(`Conectado ao servidor Render como ${this.player.name}!`, '#4ade80');
           this.updateUI();
         } else if (pkt.type === 'PLAYER_JOIN') {
           this.remotePlayers.set(pkt.player.id, pkt.player);
@@ -1108,22 +1137,23 @@
 
         document.getElementById('auth-form').addEventListener('submit', (e) => {
           e.preventDefault();
-          const username = document.getElementById('auth-username').value.trim();
+          const username = document.getElementById('auth-username').value.trim() || 'player1';
           const password = document.getElementById('auth-password').value;
-          if (this.connected) {
-            if (this.authMode === 'register') {
-              this.sendPacket({
+          const pkt = this.authMode === 'register'
+            ? {
                 type: 'AUTH_REGISTER', username, password,
                 charName: document.getElementById('auth-charname').value.trim(),
                 vocation: document.getElementById('auth-vocation').value
-              });
-            } else {
-              this.sendPacket({ type: 'AUTH_LOGIN', username, password });
-            }
+              }
+            : { type: 'AUTH_LOGIN', username, password };
+
+          if (this.connected && this.sendPacket(pkt)) {
+            document.getElementById('auth-feedback').textContent = 'Autenticando no servidor...';
           } else {
-            this.player.name = username || 'Knight Hero';
-            document.getElementById('account-modal').classList.add('hidden');
-            this.updateUI();
+            // Guarda o pedido de login e força reconexão imediata
+            this.pendingLoginRequest = pkt;
+            document.getElementById('auth-feedback').textContent = 'Estabelecendo conexão WebSocket com o Render... aguarde 2s.';
+            this.connectWebSocket(document.getElementById('server-ws-url').value);
           }
         });
 
@@ -1156,7 +1186,6 @@
           });
         });
 
-        // Clique Esquerdo no Mapa: Interagir com NPC, Atacar Monstro ou Andar A*
         this.canvas.addEventListener('click', (e) => {
           const { tx, ty } = this.getCanvasTile(e);
           if (!this.map.isBounds(tx, ty)) return;
@@ -1178,7 +1207,6 @@
           this.player.pathQueue = this.findPath(this.player.x, this.player.y, tx, ty);
         });
 
-        // Clique Direito no Mapa: Falar com NPC, Abrir Baú ou Pegar Item
         this.canvas.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           const { tx, ty } = this.getCanvasTile(e);
@@ -1210,7 +1238,6 @@
           }
         });
 
-        // Abas da Loja NPC
         document.getElementById('tab-shop-buy').addEventListener('click', () => {
           this.shopMode = 'buy';
           document.getElementById('tab-shop-buy').classList.add('active');
@@ -1242,7 +1269,6 @@
         });
         document.getElementById('btn-save-db').addEventListener('click', () => this.saveProgress());
 
-        // Chat + Comandos de NPC ("hi", "trade", "heal")
         document.getElementById('chat-form').addEventListener('submit', (e) => {
           e.preventDefault();
           const input = document.getElementById('chat-input');
@@ -1310,7 +1336,7 @@
             row.className = 'flex items-center justify-between p-1 bg-[#161616] border border-neutral-800';
             row.innerHTML = `
               <div class="flex items-center gap-1.5">
-                <img src="${this.sprites.images[tpl.spriteId].src}" class="w-6 h-6" style="image-rendering:pixelated"/>
+                <img src="${this.sprites.getUrl(tpl.spriteId)}" class="w-6 h-6" style="image-rendering:pixelated"/>
                 <div>
                   <div class="text-[11px] font-bold text-neutral-200">${tpl.name}</div>
                   <div class="text-[9px] text-amber-400">${tpl.buyPrice} gp</div>
@@ -1334,7 +1360,6 @@
             list.appendChild(row);
           });
         } else {
-          // Modo Vender itens da mochila
           let hasSellable = false;
           this.player.inventory.forEach((invItem, slotIdx) => {
             if (!invItem || invItem.id === 'item_gold') return;
@@ -1344,7 +1369,7 @@
             row.className = 'flex items-center justify-between p-1 bg-[#161616] border border-neutral-800';
             row.innerHTML = `
               <div class="flex items-center gap-1.5">
-                <img src="${this.sprites.images[invItem.spriteId].src}" class="w-6 h-6" style="image-rendering:pixelated"/>
+                <img src="${this.sprites.getUrl(invItem.spriteId)}" class="w-6 h-6" style="image-rendering:pixelated"/>
                 <div>
                   <div class="text-[11px] font-bold text-neutral-200">${invItem.name} ${invItem.count > 1 ? `(x${invItem.count})` : ''}</div>
                   <div class="text-[9px] text-amber-400">+${price} gp</div>
@@ -1523,7 +1548,7 @@
           slot.className = 'item-slot';
           slot.title = `${item.name} (Clique para pegar)`;
           const img = document.createElement('img');
-          img.src = this.sprites.images[item.spriteId].src;
+          img.src = this.sprites.getUrl(item.spriteId);
           slot.appendChild(img);
           if (item.stackable && item.count > 1) {
             const c = document.createElement('span');
@@ -1551,7 +1576,6 @@
           if (this.player.target === monster) this.player.target = null;
           this.map.monsters = this.map.monsters.filter(m => m !== monster);
 
-          // Respawn automático após 18 segundos
           setTimeout(() => {
             monster.hp = monster.maxHp;
             monster.x = monster.spawnX; monster.y = monster.spawnY;
@@ -1602,14 +1626,13 @@
           el.innerHTML = '';
           if (eq) {
             const img = document.createElement('img');
-            img.src = this.sprites.images[eq.spriteId].src;
+            img.src = this.sprites.getUrl(eq.spriteId);
             el.appendChild(img);
           } else {
             el.innerHTML = `<span class="slot-placeholder">${slotName.toUpperCase()}</span>`;
           }
         });
 
-        // Battle List (NPCs + Monstros)
         const bList = document.getElementById('battle-list');
         bList.innerHTML = '';
         document.getElementById('battle-count').textContent = `${this.map.npcs.length + this.map.monsters.length} entidades`;
@@ -1649,7 +1672,7 @@
           if (item) {
             slot.title = `${item.name} (Clique Dir: Usar/Equipar)`;
             const img = document.createElement('img');
-            img.src = this.sprites.images[item.spriteId].src;
+            img.src = this.sprites.getUrl(item.spriteId);
             slot.appendChild(img);
             if (item.stackable && item.count > 1) {
               const c = document.createElement('span');
@@ -1686,7 +1709,6 @@
           this.tryStep(next.x - this.player.x, next.y - this.player.y, 'S');
         }
 
-        // Turno de Combate do Jogador
         if (now - this.lastCombatTick >= 1400) {
           this.lastCombatTick = now;
           if (this.player.target && !this.map.tiles[this.player.y][this.player.x].pz) {
@@ -1698,7 +1720,6 @@
           }
         }
 
-        // IA dos Monstros (Respeitando Protection Zone)
         if (now - this.lastMonsterTick >= 1000) {
           this.lastMonsterTick = now;
           const playerInPZ = this.map.tiles[this.player.y][this.player.x].pz;
@@ -1743,7 +1764,6 @@
         const camY = this.player.renderY - 5 * 32;
         const waterFrame = Math.floor(now / 550) % 2;
 
-        // 1. Camada de Chão, Água Animada, Paredes e Itens
         for (let y = 0; y < this.map.height; y++) {
           for (let x = 0; x < this.map.width; x++) {
             const sx = Math.round(x * 32 - camX);
@@ -1751,19 +1771,24 @@
             if (sx < -32 || sy < -32 || sx > 480 || sy > 352) continue;
             const tile = this.map.tiles[y][x];
             const groundKey = tile.ground.startsWith('tile_water') ? `tile_water_${waterFrame}` : tile.ground;
-            ctx.drawImage(this.sprites.images[groundKey], sx, sy);
-            if (tile.wall) ctx.drawImage(this.sprites.images[tile.wall], sx, sy);
-            tile.items.forEach(it => ctx.drawImage(this.sprites.images[it.spriteId], sx, sy));
+            const gSpr = this.sprites.getCanvas(groundKey);
+            if (gSpr) ctx.drawImage(gSpr, sx, sy);
+            if (tile.wall) {
+              const wSpr = this.sprites.getCanvas(tile.wall);
+              if (wSpr) ctx.drawImage(wSpr, sx, sy);
+            }
+            tile.items.forEach(it => {
+              const iSpr = this.sprites.getCanvas(it.spriteId);
+              if (iSpr) ctx.drawImage(iSpr, sx, sy);
+            });
           }
         }
 
-        // Marcadores de Rota A*
         this.player.pathQueue.forEach(step => {
           ctx.strokeStyle = 'rgba(74, 222, 128, 0.75)';
           ctx.strokeRect(step.x * 32 - camX + 9, step.y * 32 - camY + 9, 14, 14);
         });
 
-        // 2. Círculos de Magia (exura / exori)
         this.magicCircles = this.magicCircles.filter(mc => now - mc.time < 420);
         this.magicCircles.forEach(mc => {
           const sx = mc.x * 32 - camX + 16;
@@ -1775,7 +1800,6 @@
           ctx.stroke();
         });
 
-        // 3. Entidades Ordenadas por Eixo Y (Painter's Algorithm)
         const entities = [
           { type: 'player', y: this.player.renderY, ref: this.player },
           ...this.map.npcs.map(n => ({ type: 'npc', y: n.y * 32, ref: n })),
@@ -1788,7 +1812,8 @@
             const n = ent.ref;
             const sx = Math.round(n.x * 32 - camX);
             const sy = Math.round(n.y * 32 - camY);
-            ctx.drawImage(this.sprites.images[n.spriteId], sx, sy);
+            const spr = this.sprites.getCanvas(n.spriteId);
+            if (spr) ctx.drawImage(spr, sx, sy);
             this.drawNameAndBar(ctx, sx, sy, n.name, 1, '#38bdf8', false);
           } else if (ent.type === 'monster') {
             const m = ent.ref;
@@ -1801,25 +1826,27 @@
             }
             const stepFrame = m.isMoving ? (Math.floor(now / 110) % 2) + 1 : 0;
             const sprKey = m.spriteBase === 'spr_warlord' ? 'spr_warlord' : `spr_orc_${m.direction || 'S'}_${stepFrame}`;
-            ctx.drawImage(this.sprites.images[sprKey], sx, sy);
+            const spr = this.sprites.getCanvas(sprKey);
+            if (spr) ctx.drawImage(spr, sx, sy);
             this.drawNameAndBar(ctx, sx, sy, m.name, m.hp / m.maxHp);
           } else if (ent.type === 'remote') {
             const r = ent.ref;
             const sx = Math.round(r.x * 32 - camX);
             const sy = Math.round(r.y * 32 - camY);
-            ctx.drawImage(this.sprites.images['spr_remote'], sx, sy);
+            const spr = this.sprites.getCanvas('spr_remote');
+            if (spr) ctx.drawImage(spr, sx, sy);
             this.drawNameAndBar(ctx, sx, sy, r.name, 1, '#60a5fa');
           } else {
             const sx = Math.round(this.player.renderX - camX);
             const sy = Math.round(this.player.renderY - camY);
             const stepFrame = this.player.isMoving ? (Math.floor(now / 95) % 2) + 1 : 0;
             const sprKey = `spr_player_${this.player.direction || 'S'}_${stepFrame}`;
-            ctx.drawImage(this.sprites.images[sprKey], sx, sy);
+            const spr = this.sprites.getCanvas(sprKey);
+            if (spr) ctx.drawImage(spr, sx, sy);
             this.drawNameAndBar(ctx, sx, sy, this.player.name, this.player.hp / this.player.maxHp, '#facc15');
           }
         });
 
-        // 4. Iluminação Dinâmica (Penumbra na Dungeon + Halo nas Tochas + Utevo Lux)
         const currentTile = this.map.tiles[this.player.y][this.player.x];
         if (currentTile.isDungeon || now < this.player.lightBuffUntil) {
           const lctx = this.lightCtx;
@@ -1852,10 +1879,10 @@
           ctx.drawImage(this.lightCanvas, 0, 0);
         }
 
-        // 5. Efeitos de Sangue e Textos Flutuantes
         this.bloodEffects = this.bloodEffects.filter(b => now - b.time < 350);
         this.bloodEffects.forEach(b => {
-          ctx.drawImage(this.sprites.images['fx_blood'], b.x * 32 - camX, b.y * 32 - camY);
+          const spr = this.sprites.getCanvas('fx_blood');
+          if (spr) ctx.drawImage(spr, b.x * 32 - camX, b.y * 32 - camY);
         });
 
         this.floatingTexts = this.floatingTexts.filter(ft => now - ft.start < 1050);
