@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tibia 7.x Classic - 2D Oblique RPG (Multiplayer)</title>
+  <title>Tibia 7.4 Remastered - Cidade de Thais, NPCs & Multiplayer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -11,16 +11,16 @@
     :root {
       --tibia-bg: #2b2b2b;
       --tibia-panel: #383838;
-      --tibia-slot: #222222;
-      --tibia-border-light: #6e6e6e;
+      --tibia-slot: #202020;
+      --tibia-border-light: #727272;
       --tibia-border-dark: #141414;
     }
 
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
     body {
       margin: 0; padding: 0;
-      background-color: #121214;
-      background-image: radial-gradient(#29292e 1px, transparent 1px);
+      background-color: #101014;
+      background-image: radial-gradient(#26262c 1px, transparent 1px);
       background-size: 16px 16px;
       color: #d8d8d8;
       font-family: 'Tahoma', 'Inter', sans-serif;
@@ -34,7 +34,7 @@
       border-left: 2px solid var(--tibia-border-light);
       border-right: 2px solid var(--tibia-border-dark);
       border-bottom: 2px solid var(--tibia-border-dark);
-      box-shadow: inset 1px 1px 0px #4f4f4f, 0 4px 12px rgba(0,0,0,0.65);
+      box-shadow: inset 1px 1px 0px #525252, 0 4px 14px rgba(0,0,0,0.75);
     }
 
     .tibia-inset {
@@ -46,9 +46,9 @@
     }
 
     .tibia-header {
-      background: linear-gradient(90deg, #252525 0%, #444444 50%, #252525 100%);
+      background: linear-gradient(90deg, #222222 0%, #484848 50%, #222222 100%);
       border-bottom: 1px solid #151515;
-      color: #c9c9c9;
+      color: #dedede;
       font-weight: bold;
       font-size: 11px;
       letter-spacing: 0.5px;
@@ -60,12 +60,12 @@
     }
 
     .tibia-btn {
-      background-color: #464646;
-      border-top: 2px solid #7a7a7a;
-      border-left: 2px solid #7a7a7a;
+      background-color: #484848;
+      border-top: 2px solid #7c7c7c;
+      border-left: 2px solid #7c7c7c;
       border-right: 2px solid #181818;
       border-bottom: 2px solid #181818;
-      color: #eaeaea;
+      color: #f0f0f0;
       font-size: 11px;
       font-weight: bold;
       padding: 2px 8px;
@@ -76,72 +76,71 @@
     .tibia-btn:active, .tibia-btn.active {
       border-top: 2px solid #181818;
       border-left: 2px solid #181818;
-      border-right: 2px solid #7a7a7a;
-      border-bottom: 2px solid #7a7a7a;
-      background-color: #303030;
+      border-right: 2px solid #7c7c7c;
+      border-bottom: 2px solid #7c7c7c;
+      background-color: #2e2e2e;
       transform: translate(1px, 1px);
     }
 
     #game {
       image-rendering: pixelated;
       image-rendering: crisp-edges;
-      background-color: #000;
+      background-color: #08080a;
       cursor: crosshair;
       display: block;
     }
 
     .item-slot {
       width: 36px; height: 36px;
-      background-color: #1f1f1f;
-      border-top: 2px solid #121212;
-      border-left: 2px solid #121212;
-      border-right: 2px solid #585858;
-      border-bottom: 2px solid #585858;
+      background-color: #1c1c1c;
+      border-top: 2px solid #101010;
+      border-left: 2px solid #101010;
+      border-right: 2px solid #5a5a5a;
+      border-bottom: 2px solid #5a5a5a;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: grab;
+      cursor: pointer;
     }
-    .item-slot:hover { border-color: #888; background-color: #282828; }
-    .item-slot.drag-over { outline: 2px dashed #facc15; background-color: #35321f; }
+    .item-slot:hover { border-color: #9ca3af; background-color: #282828; }
     .item-slot img { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
     .item-count {
       position: absolute; bottom: 1px; right: 2px;
-      font-size: 10px; font-weight: bold; color: #fff;
+      font-size: 10px; font-weight: bold; color: #fde047;
       text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
       pointer-events: none; line-height: 1;
     }
-    .slot-placeholder { font-size: 9px; color: #525252; text-align: center; pointer-events: none; line-height: 1; }
+    .slot-placeholder { font-size: 8px; color: #585858; text-align: center; pointer-events: none; line-height: 1; }
     .tibia-modal-backdrop {
-      background: radial-gradient(circle at center, rgba(24, 24, 28, 0.88) 0%, rgba(8, 8, 10, 0.96) 100%);
+      background: radial-gradient(circle at center, rgba(20, 20, 26, 0.88) 0%, rgba(6, 6, 8, 0.96) 100%);
       backdrop-filter: blur(2px);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-2">
 
-  <!-- MODAL DE CONTA E CONEXÃO COM O RENDER -->
+  <!-- MODAL DE CONTA E LOGIN NO RENDER -->
   <div id="account-modal" class="fixed inset-0 z-50 tibia-modal-backdrop flex items-center justify-center p-3">
     <div class="tibia-window w-full max-w-[460px] p-3 text-xs relative">
       <div class="tibia-header mb-3">
-        <span>TIBIA 7.4 - ACCOUNT & SERVER LOGIN</span>
+        <span>TIBIA 7.4 REMASTERED - LOGIN</span>
         <span id="db-conn-badge" class="text-[10px] text-amber-300 font-mono">Conectando...</span>
       </div>
 
-      <div class="tibia-inset p-3 mb-3 bg-gradient-to-b from-[#1f1c18] to-[#121316] flex items-center justify-between border border-amber-900/40">
+      <div class="tibia-inset p-3 mb-3 bg-gradient-to-b from-[#211d16] to-[#121317] flex items-center justify-between border border-amber-900/40">
         <div>
-          <div class="text-amber-400 font-bold text-sm tracking-wider">TIBIA DEDICATED ONLINE</div>
-          <div class="text-[11px] text-neutral-400 mt-0.5">Servidor Render WebSocket (Max 5 Players)</div>
+          <div class="text-amber-400 font-bold text-sm tracking-wider">CIDADE DE THAIS & DUNGEONS</div>
+          <div class="text-[11px] text-neutral-300 mt-0.5">NPCs (Sam, Xodet, Quentin), Lojas & Iluminação Dinâmica</div>
         </div>
         <div class="text-right font-mono text-[10px] text-emerald-400">
-          <div>Client v7.42</div>
-          <div>Host: Render</div>
+          <div>v2.0 Modular</div>
+          <div>Max 5 Players</div>
         </div>
       </div>
 
       <div class="tibia-inset p-2 mb-2 bg-[#171717] flex items-center justify-between gap-2">
-        <label class="text-[10px] text-neutral-400 whitespace-nowrap">WebSocket Server:</label>
+        <label class="text-[10px] text-neutral-400 whitespace-nowrap">WebSocket:</label>
         <input id="server-ws-url" type="text" value="wss://server-mmorpg.onrender.com" class="tibia-inset flex-1 px-1.5 py-0.5 text-[11px] text-amber-300 bg-[#0d0d0d] font-mono focus:outline-none" />
         <button type="button" id="btn-reconnect-server" class="tibia-btn text-[10px] py-0.5 px-2">Reconectar</button>
       </div>
@@ -153,7 +152,7 @@
 
       <form id="auth-form" class="space-y-2 tibia-inset p-2.5 bg-[#1b1b1b]">
         <div>
-          <label class="block text-[11px] text-neutral-300 mb-0.5">Account Name / Número:</label>
+          <label class="block text-[11px] text-neutral-300 mb-0.5">Account Name:</label>
           <input id="auth-username" type="text" required value="player1" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212] focus:outline-none" />
         </div>
         <div>
@@ -167,7 +166,7 @@
             <input id="auth-charname" type="text" value="Knight Hero" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212]" />
           </div>
           <div>
-            <label class="block text-[11px] text-neutral-300 mb-0.5">Vocação Inicial:</label>
+            <label class="block text-[11px] text-neutral-300 mb-0.5">Vocação:</label>
             <select id="auth-vocation" class="tibia-inset w-full px-2 py-1 text-white bg-[#121212]">
               <option value="Elite Knight">Elite Knight (+HP / Espada & Escudo)</option>
               <option value="Royal Paladin">Royal Paladin (Equilibrado)</option>
@@ -179,7 +178,7 @@
         <div id="auth-feedback" class="text-[11px] text-amber-300 min-h-[16px] font-mono"></div>
 
         <div class="flex items-center justify-between gap-2 pt-1">
-          <button type="submit" id="btn-auth-submit" class="tibia-btn flex-1 py-1.5 text-emerald-300">Conectar ao Servidor</button>
+          <button type="submit" class="tibia-btn flex-1 py-1.5 text-emerald-300">Conectar ao Servidor</button>
           <button type="button" id="btn-quick-guest" class="tibia-btn py-1.5 px-3 text-amber-300">⚡ Jogar Offline</button>
         </div>
       </form>
@@ -187,52 +186,44 @@
   </div>
 
   <!-- BARRA DE TOPO E HOTKEYS -->
-  <div class="w-full max-w-[920px] tibia-window mb-2 px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
+  <div class="w-full max-w-[960px] tibia-window mb-2 px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
     <div class="flex items-center gap-2">
       <span id="online-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-      <span class="font-bold text-amber-400 tracking-wide text-xs">TIBIA 7.4 ENGINE</span>
+      <span class="font-bold text-amber-400 tracking-wide text-xs">TIBIA 7.4 REMASTERED</span>
+      <span id="zone-badge" class="text-[10px] bg-sky-950/90 px-1.5 py-0.5 border border-sky-600 text-sky-200 font-mono">🛡️ Protection Zone (Templo)</span>
       <span id="account-status-badge" class="text-[10px] bg-black/50 px-1.5 py-0.5 border border-neutral-700 text-emerald-300 font-mono">Conectando...</span>
       <span id="online-players-count" class="text-[10px] bg-black/50 px-1.5 py-0.5 border border-neutral-700 text-sky-300 font-mono">1/5 Online</span>
     </div>
 
-    <div class="flex flex-wrap items-center gap-1.5">
-      <button id="btn-hotkey-potion" class="tibia-btn text-rose-300">[F1] Poção</button>
-      <button id="btn-hotkey-exura" class="tibia-btn text-sky-300">[F2] "exura"</button>
-      <button id="btn-hotkey-exori" class="tibia-btn text-amber-300">[F3] "exori"</button>
-      <button id="btn-net-inspector" class="tibia-btn text-purple-300">🌐 Net/WS</button>
-      <button id="btn-save-db" class="tibia-btn text-amber-300">💾 Salvar</button>
+    <div class="flex flex-wrap items-center gap-1">
+      <button id="btn-hotkey-potion" class="tibia-btn text-rose-300">[F1] Health</button>
+      <button id="btn-hotkey-mana" class="tibia-btn text-indigo-300">[F2] Mana</button>
+      <button id="btn-hotkey-exura" class="tibia-btn text-sky-300">[F3] "exura"</button>
+      <button id="btn-hotkey-exori" class="tibia-btn text-amber-300">[F4] "exori"</button>
+      <button id="btn-hotkey-lux" class="tibia-btn text-yellow-200">[F5] "utevo lux"</button>
+      <button id="btn-save-db" class="tibia-btn text-emerald-300">💾 Salvar</button>
       <button id="btn-open-account" class="tibia-btn text-neutral-200">👤 Conta</button>
     </div>
   </div>
 
-  <!-- INSPETOR DE REDE WEBSOCKET -->
-  <div id="net-inspector-panel" class="hidden w-full max-w-[920px] tibia-window mb-2 p-2 text-xs">
-    <div class="tibia-header mb-1.5">
-      <span>MULTIPLAYER WEBSOCKET INSPECTOR (server-mmorpg.onrender.com)</span>
-      <div class="flex items-center gap-2">
-        <span id="net-stats-counter" class="text-[10px] font-mono text-emerald-300">TX: 0 | RX: 0</span>
-        <button id="btn-close-net" class="text-rose-400 font-bold px-1">✕</button>
-      </div>
-    </div>
-    <div id="net-packet-log" class="tibia-inset h-[84px] overflow-y-auto p-1.5 font-mono text-[11px] bg-[#121318] space-y-0.5"></div>
-  </div>
-
   <!-- LAYOUT PRINCIPAL DO CLIENTE -->
-  <div class="w-full max-w-[920px] grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-2 items-start">
+  <div class="w-full max-w-[960px] grid grid-cols-1 lg:grid-cols-[1fr_265px] gap-2 items-start">
     <!-- COLUNA ESQUERDA: VIEWPORT + CHAT -->
     <div class="flex flex-col gap-2">
       <div class="tibia-window p-2 flex flex-col items-center justify-center relative">
         <div class="w-full tibia-header mb-1.5">
-          <span>VIEWPORT DO JOGO (15x11 Tiles | Clique longe para A* Auto-Walk)</span>
-          <span id="coords-display" class="text-[10px] font-mono text-amber-300">Pos: (7, 7)</span>
+          <span>CIDADE DE THAIS & CALABOUÇO (Clique em NPCs para Loja/Cura)</span>
+          <span id="coords-display" class="text-[10px] font-mono text-amber-300">Pos: (14, 14)</span>
         </div>
 
         <div class="tibia-inset relative overflow-hidden flex items-center justify-center bg-black">
-          <canvas id="game" width="480" height="352" class="w-[480px] h-[352px] sm:w-[600px] sm:h-[440px] max-w-full"></canvas>
+          <canvas id="game" width="480" height="352" class="w-[480px] h-[352px] sm:w-[620px] sm:h-[454px] max-w-full"></canvas>
         </div>
 
-        <div class="w-full mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-300 bg-[#2a2a2a] px-2.5 py-1.5 border border-[#1a1a1a]">
-          <div><span class="text-amber-400 font-semibold">Controles:</span> <b>Clique Esq</b>: Andar (A*) / Atacar | <b>WASD/Setas</b>: Mover | <b>Clique Dir</b>: Usar/Abrir</div>
+        <div class="w-full mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-300 bg-[#262626] px-2.5 py-1.5 border border-[#161616]">
+          <div>
+            <span class="text-amber-400 font-semibold">Dica:</span> Clique Direito em <b>Sam</b> (Ferreiro), <b>Xodet</b> (Poções) ou <b>Quentin</b> (Cura) — ou digite <b>"hi"</b> / <b>"trade"</b>!
+          </div>
           <div class="flex items-center gap-1 ml-auto">
             <button data-move="NW" class="tibia-btn px-1.5 py-0.5">↖</button>
             <button data-move="N" class="tibia-btn px-2 py-0.5">▲</button>
@@ -247,21 +238,22 @@
       </div>
 
       <!-- LOG DE SERVIDOR E CHAT -->
-      <div class="tibia-window p-1.5 flex flex-col h-[170px]">
+      <div class="tibia-window p-1.5 flex flex-col h-[175px]">
         <div class="flex items-center justify-between border-b border-[#181818] pb-1 mb-1">
-          <span class="text-[11px] font-bold text-amber-300 px-1">Server Log & Multiplayer Chat</span>
-          <span class="text-[10px] text-neutral-400 pr-1">Comandos: <b>exura</b>, <b>exori</b>, <b>/save</b></span>
+          <span class="text-[11px] font-bold text-amber-300 px-1">Server Log & NPC Channel</span>
+          <span class="text-[10px] text-neutral-400 pr-1">Fale: <b>hi</b>, <b>trade</b>, <b>heal</b>, <b>exura</b>, <b>exori</b>, <b>utevo lux</b></span>
         </div>
-        <div id="log" class="tibia-inset flex-1 overflow-y-auto p-2 font-mono text-[12px] leading-relaxed space-y-0.5 select-text"></div>
+        <div id="log" class="tibia-inset flex-1 overflow-y-auto p-2 font-mono text-[11.5px] leading-relaxed space-y-0.5 select-text"></div>
         <form id="chat-form" class="mt-1.5 flex gap-1">
-          <input id="chat-input" type="text" placeholder='Fale no chat ou digite "exura", "exori", "/save"...' autocomplete="off" class="tibia-inset flex-1 px-2 py-1 text-xs text-white focus:outline-none" />
+          <input id="chat-input" type="text" placeholder='Digite "hi", "trade", "heal", "exura", "utevo lux"...' autocomplete="off" class="tibia-inset flex-1 px-2 py-1 text-xs text-white focus:outline-none" />
           <button type="submit" class="tibia-btn px-3">Enviar</button>
         </form>
       </div>
     </div>
 
-    <!-- COLUNA DIREITA: STATUS, EQUIPAMENTOS, BATTLE LIST, INVENTÁRIO -->
+    <!-- COLUNA DIREITA: STATUS, LOJA NPC, EQUIPAMENTOS, BATTLE LIST, INVENTÁRIO -->
     <div class="flex flex-col gap-2 w-full">
+      <!-- STATUS -->
       <div class="tibia-window p-2">
         <div class="tibia-header mb-2">
           <span id="player-name-title">Knight Hero</span>
@@ -270,7 +262,7 @@
         <div class="mb-1.5">
           <div class="flex justify-between text-[11px] mb-0.5">
             <span class="font-bold text-rose-400">Hit Points</span>
-            <span id="hp-text" class="font-mono">150 / 150</span>
+            <span id="hp-text" class="font-mono">165 / 165</span>
           </div>
           <div class="w-full h-3.5 tibia-inset p-0.5">
             <div id="hp-bar" class="h-full bg-gradient-to-r from-red-700 to-rose-400 transition-all duration-150" style="width: 100%;"></div>
@@ -279,7 +271,7 @@
         <div class="mb-1.5">
           <div class="flex justify-between text-[11px] mb-0.5">
             <span class="font-bold text-sky-400">Mana</span>
-            <span id="mp-text" class="font-mono">60 / 60</span>
+            <span id="mp-text" class="font-mono">65 / 65</span>
           </div>
           <div class="w-full h-3.5 tibia-inset p-0.5">
             <div id="mp-bar" class="h-full bg-gradient-to-r from-blue-800 to-sky-400 transition-all duration-150" style="width: 100%;"></div>
@@ -294,38 +286,52 @@
             <div id="xp-bar" class="h-full bg-amber-500 transition-all duration-150" style="width: 0%;"></div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-1 text-[11px] tibia-inset p-1.5 bg-[#1c1c1c]">
-          <div class="flex justify-between px-1"><span class="text-neutral-400">Ataque:</span><span id="stat-atk" class="font-bold text-amber-300">24</span></div>
-          <div class="flex justify-between px-1"><span class="text-neutral-400">Defesa:</span><span id="stat-def" class="font-bold text-emerald-300">8</span></div>
+        <div class="grid grid-cols-3 gap-1 text-[11px] tibia-inset p-1.5 bg-[#191919]">
+          <div class="flex flex-col items-center"><span class="text-[9px] text-neutral-400">ATK</span><span id="stat-atk" class="font-bold text-amber-300">24</span></div>
+          <div class="flex flex-col items-center border-x border-neutral-800"><span class="text-[9px] text-neutral-400">DEF</span><span id="stat-def" class="font-bold text-emerald-300">19</span></div>
+          <div class="flex flex-col items-center"><span class="text-[9px] text-neutral-400">OURO</span><span id="stat-gold" class="font-bold text-yellow-400">100 gp</span></div>
         </div>
+      </div>
+
+      <!-- JANELA DE LOJA NPC (NPC TRADE WINDOW) -->
+      <div id="shop-panel" class="tibia-window p-2 hidden border border-amber-500/60">
+        <div class="tibia-header mb-1.5">
+          <span id="shop-npc-title" class="text-amber-300">NPC Trade</span>
+          <button id="btn-close-shop" class="text-xs text-rose-400 font-bold px-1">✕</button>
+        </div>
+        <div class="flex gap-1 mb-1.5">
+          <button id="tab-shop-buy" class="tibia-btn active flex-1 py-0.5 text-emerald-300">Comprar</button>
+          <button id="tab-shop-sell" class="tibia-btn flex-1 py-0.5 text-amber-300">Vender Loot</button>
+        </div>
+        <div id="shop-items-list" class="tibia-inset max-h-[135px] overflow-y-auto p-1 space-y-1"></div>
       </div>
 
       <!-- EQUIPAMENTOS -->
       <div class="tibia-window p-2">
-        <div class="tibia-header mb-2">
+        <div class="tibia-header mb-1.5">
           <span>EQUIPAMENTOS</span>
-          <span class="text-[9px] text-neutral-400">Clique Dir / Arraste</span>
+          <span class="text-[9px] text-neutral-400">Clique Dir p/ Equipar</span>
         </div>
         <div class="flex items-center justify-center gap-3 py-1">
-          <div id="equip-weapon" data-slot="weapon" class="item-slot" title="Arma"><span class="slot-placeholder">ARMA</span></div>
+          <div id="equip-weapon" class="item-slot" title="Arma"><span class="slot-placeholder">ARMA</span></div>
           <div class="flex flex-col gap-1.5">
-            <div id="equip-head" data-slot="head" class="item-slot" title="Elmo"><span class="slot-placeholder">ELMO</span></div>
-            <div id="equip-body" data-slot="body" class="item-slot" title="Armadura"><span class="slot-placeholder">CORPO</span></div>
+            <div id="equip-head" class="item-slot" title="Elmo"><span class="slot-placeholder">ELMO</span></div>
+            <div id="equip-body" class="item-slot" title="Armadura"><span class="slot-placeholder">CORPO</span></div>
           </div>
-          <div id="equip-shield" data-slot="shield" class="item-slot" title="Escudo"><span class="slot-placeholder">ESCUDO</span></div>
+          <div id="equip-shield" class="item-slot" title="Escudo"><span class="slot-placeholder">ESCUDO</span></div>
         </div>
       </div>
 
-      <!-- BATTLE LIST -->
+      <!-- BATTLE LIST (Monstros e NPCs próximos) -->
       <div class="tibia-window p-2">
         <div class="tibia-header mb-1.5">
-          <span>BATTLE LIST</span>
-          <span id="battle-count" class="text-[10px] text-neutral-400">0 alvos</span>
+          <span>BATTLE & NPC LIST</span>
+          <span id="battle-count" class="text-[10px] text-neutral-400">0 na área</span>
         </div>
-        <div id="battle-list" class="tibia-inset h-[96px] overflow-y-auto p-1 space-y-1"></div>
+        <div id="battle-list" class="tibia-inset h-[100px] overflow-y-auto p-1 space-y-1"></div>
       </div>
 
-      <!-- CONTAINER SUB-WINDOW -->
+      <!-- CONTAINER SUB-WINDOW (Baús e Corpos) -->
       <div id="container-panel" class="tibia-window p-2 hidden">
         <div class="tibia-header mb-1.5">
           <span id="container-title" class="text-amber-300">Baú / Corpo</span>
@@ -337,8 +343,8 @@
       <!-- INVENTÁRIO (4x5 = 20 SLOTS) -->
       <div class="tibia-window p-2">
         <div class="tibia-header mb-1.5">
-          <span>INVENTÁRIO (20 Slots)</span>
-          <span class="text-[9px] text-neutral-400">Clique Dir p/ Usar</span>
+          <span>MOCHILA (20 Slots)</span>
+          <span class="text-[9px] text-neutral-400">Clique Dir: Usar/Vestir</span>
         </div>
         <div class="tibia-inset p-2 flex justify-center">
           <div id="inventory-grid" style="display: grid; grid-template-columns: repeat(4, 36px); gap: 4px;"></div>
@@ -349,131 +355,357 @@
 
   <script>
     /********************************************************************
-     * 1. GERADOR PROCEDURAL DE SPRITES 32x32 (Estilo Tibia 7.x)
+     * MÓDULO 1: CATÁLOGO DE ITENS E LOJAS (config/items.js)
+     ********************************************************************/
+    const ITEM_DATABASE = {
+      item_gold: { id: 'item_gold', name: 'Gold Coin', spriteId: 'item_gold', type: 'valuables', stackable: true, buyPrice: 1, sellPrice: 1, stats: {} },
+      item_potion: { id: 'item_potion', name: 'Health Potion', spriteId: 'item_potion', type: 'consumable', stackable: true, buyPrice: 45, sellPrice: 20, stats: { healAmount: 65 } },
+      item_mana_potion: { id: 'item_mana_potion', name: 'Mana Potion', spriteId: 'item_mana_potion', type: 'consumable', stackable: true, buyPrice: 50, sellPrice: 22, stats: { manaAmount: 60 } },
+      item_sword: { id: 'item_sword', name: 'Longsword', spriteId: 'item_sword', type: 'weapon', stackable: false, buyPrice: 120, sellPrice: 55, stats: { atk: 12, def: 2 } },
+      item_spike_sword: { id: 'item_spike_sword', name: 'Spike Sword', spriteId: 'item_spike_sword', type: 'weapon', stackable: false, buyPrice: 240, sellPrice: 110, stats: { atk: 19, def: 4 } },
+      item_fire_sword: { id: 'item_fire_sword', name: 'Fire Sword', spriteId: 'item_fire_sword', type: 'weapon', stackable: false, buyPrice: 550, sellPrice: 260, stats: { atk: 28, def: 6 } },
+      item_shield: { id: 'item_shield', name: 'Dwarven Shield', spriteId: 'item_shield', type: 'shield', stackable: false, buyPrice: 140, sellPrice: 65, stats: { def: 8 } },
+      item_crown_shield: { id: 'item_crown_shield', name: 'Crown Shield', spriteId: 'item_crown_shield', type: 'shield', stackable: false, buyPrice: 380, sellPrice: 180, stats: { def: 15 } },
+      item_armor: { id: 'item_armor', name: 'Plate Armor', spriteId: 'item_armor', type: 'body', stackable: false, buyPrice: 320, sellPrice: 140, stats: { def: 10 } },
+      item_helmet: { id: 'item_helmet', name: 'Crusader Helmet', spriteId: 'item_helmet', type: 'head', stackable: false, buyPrice: 210, sellPrice: 95, stats: { def: 5 } }
+    };
+
+    function createItemInstance(itemId, count = 1) {
+      const tpl = ITEM_DATABASE[itemId];
+      if (!tpl) return null;
+      return {
+        id: tpl.id,
+        name: tpl.name,
+        spriteId: tpl.spriteId,
+        type: tpl.type,
+        stackable: tpl.stackable,
+        count: count,
+        buyPrice: tpl.buyPrice,
+        sellPrice: tpl.sellPrice,
+        stats: Object.assign({ atk: 0, def: 0, healAmount: 0, manaAmount: 0 }, tpl.stats),
+        pickupable: true,
+        contents: []
+      };
+    }
+
+    /********************************************************************
+     * MÓDULO 2: GERADOR DE SPRITES HD + OUTLINE PRETO 1PX (graphics/SpriteSheet.js)
      ********************************************************************/
     class SpriteCatalog {
       constructor() {
         this.images = {};
       }
-      make(drawFn) {
+      make(drawFn, addBlackOutline = false) {
         const c = document.createElement('canvas');
         c.width = 32; c.height = 32;
         const ctx = c.getContext('2d');
         ctx.imageSmoothingEnabled = false;
         drawFn(ctx);
+
+        if (addBlackOutline) {
+          const src = ctx.getImageData(0, 0, 32, 32);
+          const dst = ctx.createImageData(32, 32);
+          const d = src.data;
+          const out = dst.data;
+          for (let i = 0; i < d.length; i++) out[i] = d[i];
+
+          for (let y = 1; y < 31; y++) {
+            for (let x = 1; x < 31; x++) {
+              const idx = (y * 32 + x) * 4;
+              if (d[idx + 3] === 0) {
+                const n = ((y - 1) * 32 + x) * 4;
+                const s = ((y + 1) * 32 + x) * 4;
+                const w = (y * 32 + (x - 1)) * 4;
+                const e = (y * 32 + (x + 1)) * 4;
+                if (d[n + 3] > 180 || d[s + 3] > 180 || d[w + 3] > 180 || d[e + 3] > 180) {
+                  out[idx] = 12; out[idx + 1] = 12; out[idx + 2] = 14; out[idx + 3] = 255;
+                }
+              }
+            }
+          }
+          ctx.putImageData(dst, 0, 0);
+        }
+
         const img = new Image();
         img.src = c.toDataURL('image/png');
         return img;
       }
+
       generateAll() {
+        // 1. Pisos da Cidade, Templo, Floresta, Água e Caverna
         this.images['tile_grass'] = this.make(ctx => {
-          ctx.fillStyle = '#244b1e'; ctx.fillRect(0, 0, 32, 32);
-          const shades = ['#1e3f19', '#2b5824', '#32632a', '#1a3715'];
-          for (let y = 0; y < 32; y += 2)
+          ctx.fillStyle = '#254d1e'; ctx.fillRect(0, 0, 32, 32);
+          const shades = ['#1f4219', '#2b5923', '#326629', '#1b3816'];
+          for (let y = 0; y < 32; y += 2) {
             for (let x = 0; x < 32; x += 2) {
-              ctx.fillStyle = shades[(x * 7 + y * 13) % shades.length];
+              ctx.fillStyle = shades[(x * 11 + y * 17) % shades.length];
               ctx.fillRect(x, y, 2, 2);
             }
+          }
+          ctx.fillStyle = '#407a36'; ctx.fillRect(6, 8, 2, 1); ctx.fillRect(22, 19, 2, 1);
         });
+
+        this.images['tile_cobble'] = this.make(ctx => {
+          ctx.fillStyle = '#575551'; ctx.fillRect(0, 0, 32, 32);
+          const stones = [[1,1,14,14,'#6e6b66'], [16,1,15,14,'#63605b'], [1,16,15,15,'#5e5c57'], [17,16,14,15,'#6b6863']];
+          stones.forEach(([x,y,w,h,col]) => {
+            ctx.fillStyle = col; ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = '#7d7a74'; ctx.fillRect(x+1, y+1, w-3, 1);
+          });
+          ctx.fillStyle = '#33312e';
+          ctx.fillRect(0, 15, 32, 1); ctx.fillRect(15, 0, 1, 32);
+        });
+
+        this.images['tile_temple'] = this.make(ctx => {
+          for (let y = 0; y < 32; y += 16) {
+            for (let x = 0; x < 32; x += 16) {
+              const light = ((x + y) / 16) % 2 === 0;
+              ctx.fillStyle = light ? '#cbd5e1' : '#64748b';
+              ctx.fillRect(x, y, 16, 16);
+              ctx.fillStyle = light ? '#f1f5f9' : '#94a3b8';
+              ctx.fillRect(x + 1, y + 1, 14, 1);
+            }
+          }
+          ctx.strokeStyle = '#334155'; ctx.strokeRect(0, 0, 32, 32);
+        });
+
+        this.images['tile_wood'] = this.make(ctx => {
+          ctx.fillStyle = '#5c3a21'; ctx.fillRect(0, 0, 32, 32);
+          for (let y = 0; y < 32; y += 8) {
+            ctx.fillStyle = y % 16 === 0 ? '#694226' : '#52331c';
+            ctx.fillRect(0, y, 32, 7);
+            ctx.fillStyle = '#2e1b0e'; ctx.fillRect(0, y + 7, 32, 1);
+          }
+        });
+
         this.images['tile_stone'] = this.make(ctx => {
-          ctx.fillStyle = '#4a4d52'; ctx.fillRect(0, 0, 32, 32);
-          ctx.fillStyle = '#26282b'; ctx.fillRect(0, 15, 32, 2); ctx.fillRect(15, 0, 2, 32);
+          ctx.fillStyle = '#393b40'; ctx.fillRect(0, 0, 32, 32);
+          ctx.fillStyle = '#474a50'; ctx.fillRect(2, 2, 12, 12); ctx.fillRect(16, 16, 14, 14);
+          ctx.fillStyle = '#232428'; ctx.fillRect(0, 15, 32, 2); ctx.fillRect(15, 0, 2, 32);
         });
+
+        for (let f = 0; f < 2; f++) {
+          this.images['tile_water_' + f] = this.make(ctx => {
+            ctx.fillStyle = '#1e3a8a'; ctx.fillRect(0, 0, 32, 32);
+            ctx.fillStyle = '#1d4ed8'; ctx.fillRect(0, 4 + f * 3, 32, 8); ctx.fillRect(0, 18 - f * 3, 32, 8);
+            ctx.fillStyle = '#60a5fa';
+            ctx.fillRect(4 + f * 6, 8, 8, 2);
+            ctx.fillRect(16 - f * 5, 22, 9, 2);
+          });
+        }
+
+        // 2. Paredes, Árvores, Tochas e Objetos
         this.images['wall_brick'] = this.make(ctx => {
-          ctx.fillStyle = '#111113'; ctx.fillRect(0, 0, 32, 32);
-          ctx.fillStyle = '#737780'; ctx.fillRect(1, 1, 30, 10);
-          ctx.fillStyle = '#505359'; ctx.fillRect(1, 11, 30, 20);
-          ctx.fillStyle = '#232426'; ctx.fillRect(0, 11, 32, 2); ctx.fillRect(0, 20, 32, 1);
+          ctx.fillStyle = '#141416'; ctx.fillRect(0, 0, 32, 32);
+          ctx.fillStyle = '#7c808a'; ctx.fillRect(1, 1, 30, 9);
+          ctx.fillStyle = '#565961'; ctx.fillRect(1, 11, 30, 20);
+          ctx.fillStyle = '#2b2d31';
+          ctx.fillRect(0, 10, 32, 2); ctx.fillRect(0, 20, 32, 2);
+          ctx.fillRect(15, 11, 2, 9); ctx.fillRect(8, 21, 2, 10); ctx.fillRect(23, 21, 2, 10);
         });
-        this.images['spr_player'] = this.make(ctx => {
-          ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(7, 26, 18, 4);
-          ctx.fillStyle = '#991b1b'; ctx.fillRect(8, 11, 16, 13);
-          ctx.fillStyle = '#cbd5e1'; ctx.fillRect(9, 12, 14, 10);
-          ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10, 3, 12, 9);
-          ctx.fillStyle = '#1e293b'; ctx.fillRect(12, 6, 8, 2);
-          ctx.fillStyle = '#f8fafc'; ctx.fillRect(4, 7, 3, 12);
-          ctx.fillStyle = '#eab308'; ctx.fillRect(2, 16, 7, 2);
-          ctx.fillStyle = '#3b82f6'; ctx.fillRect(22, 12, 6, 8);
+
+        this.images['wall_torch'] = this.make(ctx => {
+          ctx.drawImage(this.images['wall_brick'], 0, 0);
+          ctx.fillStyle = '#451a03'; ctx.fillRect(14, 15, 4, 9);
+          ctx.fillStyle = '#f97316'; ctx.fillRect(13, 10, 6, 6);
+          ctx.fillStyle = '#fde047'; ctx.fillRect(14, 11, 4, 4);
         });
+
+        this.images['obj_tree'] = this.make(ctx => {
+          ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(8, 25, 16, 5);
+          ctx.fillStyle = '#5c3a21'; ctx.fillRect(13, 18, 6, 10);
+          ctx.fillStyle = '#166534'; ctx.fillRect(5, 5, 22, 16);
+          ctx.fillStyle = '#15803d'; ctx.fillRect(7, 3, 18, 14);
+          ctx.fillStyle = '#22c55e'; ctx.fillRect(9, 5, 6, 5); ctx.fillRect(17, 8, 5, 5);
+        }, true);
+
+        this.images['obj_fountain'] = this.make(ctx => {
+          ctx.fillStyle = '#64748b'; ctx.fillRect(3, 8, 26, 20);
+          ctx.fillStyle = '#0284c7'; ctx.fillRect(6, 11, 20, 14);
+          ctx.fillStyle = '#7dd3fc'; ctx.fillRect(13, 6, 6, 12);
+          ctx.fillStyle = '#e0f2fe'; ctx.fillRect(14, 5, 4, 5);
+        }, true);
+
+        // 3. Sprites de Criaturas com Direções e Frames (Herói, NPCs e Monstros)
+        const dirs = ['N', 'S', 'W', 'E'];
+        dirs.forEach(dir => {
+          for (let step = 0; step < 3; step++) {
+            const legOffset = step === 1 ? -2 : step === 2 ? 2 : 0;
+            this.images[`spr_player_${dir}_${step}`] = this.make(ctx => {
+              ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(8, 26, 16, 4);
+              // Pernas com animação de passo
+              ctx.fillStyle = '#334155';
+              ctx.fillRect(10, 21 + (legOffset > 0 ? -1 : 0), 5, 6);
+              ctx.fillRect(17, 21 + (legOffset < 0 ? -1 : 0), 5, 6);
+              // Capa e Armadura
+              ctx.fillStyle = '#991b1b'; ctx.fillRect(8, 11, 16, 12);
+              ctx.fillStyle = '#cbd5e1'; ctx.fillRect(9, 11, 14, 10);
+              // Cabeça/Elmo
+              ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10, 3, 12, 9);
+              if (dir !== 'N') {
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(12, 6, 8, 2);
+              }
+              // Espada e Escudo conforme direção
+              ctx.fillStyle = '#f8fafc';
+              if (dir === 'W') ctx.fillRect(3, 9, 6, 3);
+              else if (dir === 'E') ctx.fillRect(23, 9, 6, 3);
+              else ctx.fillRect(4, 7, 3, 12);
+              ctx.fillStyle = '#eab308'; ctx.fillRect(22, 12, 6, 8);
+              ctx.fillStyle = '#3b82f6'; ctx.fillRect(23, 13, 4, 6);
+            }, true);
+
+            this.images[`spr_orc_${dir}_${step}`] = this.make(ctx => {
+              ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(8, 26, 16, 4);
+              ctx.fillStyle = '#3f6212';
+              ctx.fillRect(10, 21 + (legOffset > 0 ? -1 : 0), 5, 6);
+              ctx.fillRect(17, 21 + (legOffset < 0 ? -1 : 0), 5, 6);
+              ctx.fillStyle = '#78350f'; ctx.fillRect(8, 11, 16, 11);
+              ctx.fillStyle = '#65a30d'; ctx.fillRect(10, 3, 12, 9);
+              if (dir !== 'N') {
+                ctx.fillStyle = '#ef4444'; ctx.fillRect(12, 6, 2, 2); ctx.fillRect(18, 6, 2, 2);
+              }
+              ctx.fillStyle = '#cbd5e1'; ctx.fillRect(3, 8, 5, 8);
+            }, true);
+          }
+        });
+
+        this.images['spr_warlord'] = this.make(ctx => {
+          ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(6, 26, 20, 4);
+          ctx.fillStyle = '#7f1d1d'; ctx.fillRect(7, 10, 18, 15);
+          ctx.fillStyle = '#4d7c0f'; ctx.fillRect(9, 3, 14, 9);
+          ctx.fillStyle = '#facc15'; ctx.fillRect(8, 1, 3, 4); ctx.fillRect(21, 1, 3, 4);
+          ctx.fillStyle = '#ef4444'; ctx.fillRect(12, 6, 2, 2); ctx.fillRect(18, 6, 2, 2);
+          ctx.fillStyle = '#e2e8f0'; ctx.fillRect(2, 6, 5, 14);
+        }, true);
+
+        this.images['spr_npc_sam'] = this.make(ctx => {
+          ctx.fillStyle = '#451a03'; ctx.fillRect(8, 11, 16, 14);
+          ctx.fillStyle = '#fcd34d'; ctx.fillRect(10, 3, 12, 9);
+          ctx.fillStyle = '#92400e'; ctx.fillRect(10, 9, 12, 5); // Barba de ferreiro
+          ctx.fillStyle = '#94a3b8'; ctx.fillRect(3, 8, 4, 10);
+        }, true);
+
+        this.images['spr_npc_xodet'] = this.make(ctx => {
+          ctx.fillStyle = '#4c1d95'; ctx.fillRect(8, 11, 16, 15);
+          ctx.fillStyle = '#fde68a'; ctx.fillRect(10, 4, 12, 8);
+          ctx.fillStyle = '#6d28d9'; ctx.fillRect(8, 1, 16, 4);
+          ctx.fillStyle = '#38bdf8'; ctx.fillRect(4, 6, 3, 16);
+        }, true);
+
+        this.images['spr_npc_quentin'] = this.make(ctx => {
+          ctx.fillStyle = '#f59e0b'; ctx.fillRect(8, 11, 16, 15);
+          ctx.fillStyle = '#fef08a'; ctx.fillRect(10, 4, 12, 8);
+          ctx.fillStyle = '#fef9c3'; ctx.fillRect(13, 13, 6, 9);
+        }, true);
+
         this.images['spr_remote'] = this.make(ctx => {
-          ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(7, 26, 18, 4);
-          ctx.fillStyle = '#1d4ed8'; ctx.fillRect(8, 11, 16, 13);
-          ctx.fillStyle = '#93c5fd'; ctx.fillRect(9, 12, 14, 10);
-          ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10, 3, 12, 9);
+          ctx.fillStyle = '#1d4ed8'; ctx.fillRect(8, 11, 16, 14);
+          ctx.fillStyle = '#93c5fd'; ctx.fillRect(10, 3, 12, 9);
           ctx.fillStyle = '#facc15'; ctx.fillRect(4, 7, 3, 12);
-        });
-        this.images['spr_orc'] = this.make(ctx => {
-          ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(7, 26, 18, 4);
-          ctx.fillStyle = '#78350f'; ctx.fillRect(8, 11, 16, 12);
-          ctx.fillStyle = '#65a30d'; ctx.fillRect(10, 3, 12, 8);
-          ctx.fillStyle = '#ef4444'; ctx.fillRect(12, 5, 2, 2); ctx.fillRect(18, 5, 2, 2);
-          ctx.fillStyle = '#cbd5e1'; ctx.fillRect(3, 8, 5, 7);
-        });
+        }, true);
+
+        // 4. Ícones de Itens com Outline Clássico
         this.images['item_potion'] = this.make(ctx => {
-          ctx.fillStyle = '#d97706'; ctx.fillRect(13, 4, 6, 3);
-          ctx.fillStyle = '#111'; ctx.fillRect(7, 10, 18, 18);
-          ctx.fillStyle = '#ef4444'; ctx.fillRect(9, 13, 14, 13);
-        });
+          ctx.fillStyle = '#d97706'; ctx.fillRect(13, 5, 6, 3);
+          ctx.fillStyle = '#ef4444'; ctx.fillRect(8, 10, 16, 16);
+          ctx.fillStyle = '#fca5a5'; ctx.fillRect(10, 12, 4, 5);
+        }, true);
+
+        this.images['item_mana_potion'] = this.make(ctx => {
+          ctx.fillStyle = '#d97706'; ctx.fillRect(13, 5, 6, 3);
+          ctx.fillStyle = '#2563eb'; ctx.fillRect(8, 10, 16, 16);
+          ctx.fillStyle = '#93c5fd'; ctx.fillRect(10, 12, 4, 5);
+        }, true);
+
         this.images['item_sword'] = this.make(ctx => {
-          for (let i = 0; i < 16; i++) { ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10 + i, 21 - i, 3, 3); }
+          for (let i = 0; i < 15; i++) { ctx.fillStyle = '#e2e8f0'; ctx.fillRect(10 + i, 21 - i, 3, 3); }
           ctx.fillStyle = '#eab308'; ctx.fillRect(6, 20, 8, 3);
-        });
+        }, true);
+
+        this.images['item_spike_sword'] = this.make(ctx => {
+          for (let i = 0; i < 16; i++) { ctx.fillStyle = '#38bdf8'; ctx.fillRect(10 + i, 21 - i, 3, 3); }
+          ctx.fillStyle = '#facc15'; ctx.fillRect(6, 19, 9, 4);
+        }, true);
+
+        this.images['item_fire_sword'] = this.make(ctx => {
+          for (let i = 0; i < 16; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#f97316' : '#fde047';
+            ctx.fillRect(10 + i, 21 - i, 4, 4);
+          }
+          ctx.fillStyle = '#dc2626'; ctx.fillRect(6, 19, 9, 4);
+        }, true);
+
         this.images['item_shield'] = this.make(ctx => {
           ctx.fillStyle = '#eab308'; ctx.fillRect(7, 5, 18, 22);
           ctx.fillStyle = '#64748b'; ctx.fillRect(9, 7, 14, 18);
-        });
+        }, true);
+
+        this.images['item_crown_shield'] = this.make(ctx => {
+          ctx.fillStyle = '#facc15'; ctx.fillRect(6, 5, 20, 22);
+          ctx.fillStyle = '#dc2626'; ctx.fillRect(9, 8, 14, 16);
+          ctx.fillStyle = '#fde047'; ctx.fillRect(13, 12, 6, 6);
+        }, true);
+
         this.images['item_armor'] = this.make(ctx => {
           ctx.fillStyle = '#94a3b8'; ctx.fillRect(6, 6, 20, 20);
-          ctx.fillStyle = '#cbd5e1'; ctx.fillRect(9, 8, 14, 16);
-        });
+          ctx.fillStyle = '#e2e8f0'; ctx.fillRect(9, 8, 14, 16);
+        }, true);
+
         this.images['item_helmet'] = this.make(ctx => {
           ctx.fillStyle = '#cbd5e1'; ctx.fillRect(8, 7, 16, 18);
-          ctx.fillStyle = '#1e293b'; ctx.fillRect(10, 14, 12, 3);
-        });
+          ctx.fillStyle = '#0f172a'; ctx.fillRect(10, 14, 12, 3);
+        }, true);
+
         this.images['item_gold'] = this.make(ctx => {
-          ctx.fillStyle = '#eab308'; ctx.fillRect(9, 17, 9, 9);
-          ctx.fillStyle = '#facc15'; ctx.fillRect(14, 11, 9, 9);
-        });
+          ctx.fillStyle = '#ca8a04'; ctx.fillRect(8, 16, 10, 10);
+          ctx.fillStyle = '#facc15'; ctx.fillRect(13, 10, 10, 10);
+        }, true);
+
         this.images['obj_chest'] = this.make(ctx => {
           ctx.fillStyle = '#92400e'; ctx.fillRect(4, 7, 24, 8);
           ctx.fillStyle = '#78350f'; ctx.fillRect(4, 15, 24, 11);
           ctx.fillStyle = '#facc15'; ctx.fillRect(14, 13, 4, 5);
-        });
+        }, true);
+
         this.images['obj_corpse'] = this.make(ctx => {
           ctx.fillStyle = '#7f1d1d'; ctx.fillRect(5, 13, 22, 13);
           ctx.fillStyle = '#3f6212'; ctx.fillRect(8, 11, 14, 11);
-        });
+        }, true);
+
         this.images['fx_blood'] = this.make(ctx => {
           ctx.fillStyle = '#dc2626';
-          ctx.fillRect(13, 13, 6, 6); ctx.fillRect(9, 10, 4, 4); ctx.fillRect(19, 16, 4, 4);
+          ctx.fillRect(13, 13, 6, 6); ctx.fillRect(8, 9, 4, 4); ctx.fillRect(19, 17, 4, 4);
         });
       }
     }
 
     /********************************************************************
-     * 2. CLASSES DE ENTIDADES (Item, Monster, Player, WorldMap, A*)
+     * MÓDULO 3: MUNDO 44x44 — CIDADE DE THAIS-MINI, NPCS E MONSTROS
      ********************************************************************/
-    class Item {
-      constructor({ id, name, spriteId, type, stackable = false, count = 1, stats = {}, pickupable = true, contents = [] }) {
+    class NPC {
+      constructor({ id, name, role, x, y, spriteId, greeting, shopItems = [], heals = false }) {
         this.id = id;
         this.name = name;
-        this.spriteId = spriteId || id;
-        this.type = type; // 'weapon', 'shield', 'head', 'body', 'consumable', 'valuables', 'container'
-        this.stackable = stackable;
-        this.count = count;
-        this.stats = Object.assign({ atk: 0, def: 0, healAmount: 0 }, stats);
-        this.pickupable = pickupable;
-        this.contents = contents;
+        this.role = role;
+        this.x = x;
+        this.y = y;
+        this.spriteId = spriteId;
+        this.greeting = greeting;
+        this.shopItems = shopItems;
+        this.heals = heals;
       }
     }
 
     class Monster {
-      constructor({ id, name, x, y, hp = 80, maxHp = 80, attack = 14, defense = 5, xpValue = 45 }) {
+      constructor({ id, name, spriteBase, x, y, hp, maxHp, attack, defense, xpValue }) {
         this.id = id;
         this.name = name;
+        this.spriteBase = spriteBase || 'spr_orc';
         this.x = x; this.y = y;
+        this.spawnX = x; this.spawnY = y;
         this.renderX = x * 32; this.renderY = y * 32;
         this.startX = x * 32; this.startY = y * 32;
+        this.direction = 'S';
         this.hp = hp; this.maxHp = maxHp;
         this.attack = attack; this.defense = defense;
         this.xpValue = xpValue;
@@ -482,9 +714,10 @@
         this.moveStartTime = 0;
         this.speed = 340;
       }
-      startMove(nx, ny) {
+      startMove(nx, ny, dir) {
         this.startX = this.renderX; this.startY = this.renderY;
         this.x = nx; this.y = ny;
+        this.direction = dir || this.direction;
         this.isMoving = true;
         this.moveStartTime = performance.now();
       }
@@ -500,34 +733,180 @@
       }
     }
 
+    class WorldMap {
+      constructor(w = 44, h = 44) {
+        this.width = w; this.height = h;
+        this.tiles = [];
+        this.monsters = [];
+        this.npcs = [];
+        this.lights = [];
+        this.initWorld();
+      }
+
+      initWorld() {
+        for (let y = 0; y < this.height; y++) {
+          this.tiles[y] = [];
+          for (let x = 0; x < this.width; x++) {
+            let ground = 'tile_grass';
+            let wall = null;
+            let pz = false;
+
+            const isBorder = x === 0 || y === 0 || x === this.width - 1 || y === this.height - 1;
+
+            // Rio ao Sul da Cidade
+            const isRiver = y >= 24 && y <= 26 && (x < 13 || x > 16);
+
+            // Cidade Murada de Thais-Mini (x: 4..23, y: 4..21)
+            const inCity = x >= 4 && x <= 23 && y >= 4 && y <= 21;
+            const isCityWall = inCity && (x === 4 || x === 23 || y === 4 || y === 21) &&
+              !((x === 23 && (y === 12 || y === 13)) || (y === 21 && (x === 14 || x === 15)));
+
+            // Templo Central (Protection Zone - x: 11..17, y: 11..16)
+            const inTemple = x >= 11 && x <= 17 && y >= 11 && y <= 16;
+            const isTempleWall = inTemple && (x === 11 || x === 17 || y === 11 || y === 16) && !(y === 16 && x === 14);
+
+            // Ferraria do Sam (Oeste - x: 6..9, y: 6..11)
+            const inSmith = x >= 6 && x <= 9 && y >= 6 && y <= 11;
+            const isSmithWall = inSmith && (x === 6 || x === 9 || y === 6 || y === 11) && !(x === 9 && y === 9);
+
+            // Loja de Magia do Xodet (Sul - x: 6..10, y: 15..19)
+            const inMagic = x >= 6 && x <= 10 && y >= 15 && y <= 19;
+            const isMagicWall = inMagic && (x === 6 || x === 10 || y === 15 || y === 19) && !(x === 10 && y === 17);
+
+            // Calabouço de Pedra dos Orcs (Leste - x: 29..40, y: 5..20)
+            const inDungeon = x >= 29 && x <= 40 && y >= 5 && y <= 20;
+            const isDungeonWall = inDungeon && (x === 29 || x === 40 || y === 5 || y === 20) && !(x === 29 && (y === 12 || y === 13));
+
+            if (inCity) ground = 'tile_cobble';
+            if (inTemple) { ground = 'tile_temple'; pz = true; }
+            if (inSmith || inMagic) { ground = 'tile_wood'; pz = true; }
+            if (inDungeon) ground = 'tile_stone';
+            if (isRiver) ground = 'tile_water_0';
+
+            if (isBorder || isCityWall || isTempleWall || isSmithWall || isMagicWall || isDungeonWall) {
+              wall = ((x + y) % 6 === 0) ? 'wall_torch' : 'wall_brick';
+              if (wall === 'wall_torch') this.lights.push({ x, y, radius: 115, color: 'rgba(251, 146, 60, 0.35)' });
+            }
+
+            // Árvores na floresta
+            if (!wall && ground === 'tile_grass' && !inCity && ((x * 19 + y * 31) % 23 === 0) && x > 24) {
+              wall = 'obj_tree';
+            }
+
+            const walkable = !wall && !isRiver;
+            this.tiles[y][x] = { ground, wall, walkable, pz, items: [], isDungeon };
+          }
+        }
+
+        // Fonte na Praça Central da Cidade
+        this.tiles[9][14].wall = 'obj_fountain';
+        this.tiles[9][14].walkable = false;
+
+        // Baú de Recompensa na Fortaleza dos Orcs
+        const chest = createItemInstance('item_gold', 1);
+        chest.id = 'obj_chest'; chest.name = 'Baú Real dos Orcs'; chest.spriteId = 'obj_chest';
+        chest.type = 'container'; chest.pickupable = false;
+        chest.contents = [
+          createItemInstance('item_fire_sword', 1),
+          createItemInstance('item_crown_shield', 1),
+          createItemInstance('item_gold', 150)
+        ];
+        this.tiles[8][38].items.push(chest);
+
+        // NPCs da Cidade de Thais-Mini
+        this.npcs.push(new NPC({
+          id: 'npc_quentin', name: 'Quentin (Monge)', role: 'Templo & Cura', x: 14, y: 12,
+          spriteId: 'spr_npc_quentin',
+          greeting: 'Que os deuses abençoem você! Eu curei todos os seus ferimentos e mana!',
+          heals: true
+        }));
+
+        this.npcs.push(new NPC({
+          id: 'npc_sam', name: 'Sam (Ferreiro)', role: 'Armas & Armaduras', x: 7, y: 8,
+          spriteId: 'spr_npc_sam',
+          greeting: 'Olá aventureiro! Bem-vindo à Ferraria de Thais. Veja minhas armas e armaduras!',
+          shopItems: ['item_spike_sword', 'item_fire_sword', 'item_armor', 'item_helmet', 'item_shield', 'item_crown_shield']
+        }));
+
+        this.npcs.push(new NPC({
+          id: 'npc_xodet', name: 'Xodet (Alquimista)', role: 'Poções & Runas', x: 8, y: 17,
+          spriteId: 'spr_npc_xodet',
+          greeting: 'Saudações místicas! Compre poções de vida e mana para explorar a Dungeon Leste.',
+          shopItems: ['item_potion', 'item_mana_potion']
+        }));
+
+        // Spawns de Monstros fora dos portões da cidade e na Dungeon
+        const spawns = [
+          [25, 10, 'Orc Spearman', 70, 12, 40],
+          [26, 15, 'Orc Warrior', 90, 15, 55],
+          [20, 28, 'Orc Warrior', 90, 15, 55],
+          [32, 9, 'Orc Berserker', 125, 22, 85],
+          [34, 15, 'Orc Berserker', 125, 22, 85],
+          [37, 11, 'Orc Warlord', 210, 30, 180]
+        ];
+        spawns.forEach(([sx, sy, name, hp, atk, xp], idx) => {
+          this.monsters.push(new Monster({
+            id: 'mob_' + idx,
+            name,
+            spriteBase: name === 'Orc Warlord' ? 'spr_warlord' : 'spr_orc',
+            x: sx, y: sy,
+            hp, maxHp: hp,
+            attack: atk, defense: 6, xpValue: xp
+          }));
+        });
+      }
+
+      isBounds(x, y) { return x >= 0 && y >= 0 && x < this.width && y < this.height; }
+      isWalkable(x, y, ignoreEntity = null, isMonster = false) {
+        if (!this.isBounds(x, y)) return false;
+        const tile = this.tiles[y][x];
+        if (!tile.walkable) return false;
+        if (isMonster && tile.pz) return false; // Monstros não entram no Templo/Lojas (PZ)
+        for (const npc of this.npcs) {
+          if (npc.x === x && npc.y === y) return false;
+        }
+        for (const m of this.monsters) {
+          if (m !== ignoreEntity && m.x === x && m.y === y) return false;
+        }
+        return true;
+      }
+    }
+
+    /********************************************************************
+     * MÓDULO 4: JOGADOR E ENGINE PRINCIPAL (TibiaGame)
+     ********************************************************************/
     class Player {
       constructor() {
         this.name = 'Knight Hero';
         this.vocation = 'Elite Knight';
-        this.x = 7; this.y = 7;
-        this.renderX = 7 * 32; this.renderY = 7 * 32;
-        this.startX = 7 * 32; this.startY = 7 * 32;
+        this.x = 14; this.y = 14; // Inicia no Templo de Thais
+        this.renderX = 14 * 32; this.renderY = 14 * 32;
+        this.startX = 14 * 32; this.startY = 14 * 32;
         this.direction = 'S';
-        this.hp = 150; this.maxHp = 150;
-        this.mp = 60; this.maxMp = 60;
+        this.hp = 165; this.maxHp = 165;
+        this.mp = 65; this.maxMp = 65;
         this.level = 1; this.xp = 0; this.nextLevelXp = 100;
-        this.speed = 250;
+        this.speed = 230;
         this.isMoving = false;
         this.moveStartTime = 0;
         this.attackPower = 12;
         this.defense = 6;
         this.target = null;
         this.pathQueue = [];
+        this.lightBuffUntil = 0;
+
         this.equipment = {
-          head: new Item({ id: 'item_helmet', name: 'Elmo Cruzado', type: 'head', stats: { def: 3 } }),
-          body: new Item({ id: 'item_armor', name: 'Plate Armor', type: 'body', stats: { def: 6 } }),
-          weapon: new Item({ id: 'item_sword', name: 'Espada Longa', type: 'weapon', stats: { atk: 12, def: 2 } }),
-          shield: new Item({ id: 'item_shield', name: 'Beholder Shield', type: 'shield', stats: { def: 8 } })
+          head: createItemInstance('item_helmet', 1),
+          body: createItemInstance('item_armor', 1),
+          weapon: createItemInstance('item_sword', 1),
+          shield: createItemInstance('item_shield', 1)
         };
         this.inventory = new Array(20).fill(null);
-        this.inventory[0] = new Item({ id: 'item_potion', name: 'Poção de Vida', type: 'consumable', stackable: true, count: 5, stats: { healAmount: 50 } });
-        this.inventory[1] = new Item({ id: 'item_gold', name: 'Gold Coin', type: 'valuables', stackable: true, count: 25 });
+        this.inventory[0] = createItemInstance('item_potion', 5);
+        this.inventory[1] = createItemInstance('item_mana_potion', 3);
+        this.inventory[2] = createItemInstance('item_gold', 100);
       }
+
       getTotalAtk() {
         return this.attackPower + (this.equipment.weapon ? this.equipment.weapon.stats.atk : 0);
       }
@@ -535,6 +914,23 @@
         let d = this.defense;
         Object.values(this.equipment).forEach(eq => { if (eq && eq.stats.def) d += eq.stats.def; });
         return d;
+      }
+      getGoldCount() {
+        return this.inventory.reduce((sum, it) => (it && it.id === 'item_gold') ? sum + it.count : sum, 0);
+      }
+      spendGold(amount) {
+        if (this.getGoldCount() < amount) return false;
+        let rem = amount;
+        for (let i = 0; i < this.inventory.length && rem > 0; i++) {
+          const it = this.inventory[i];
+          if (it && it.id === 'item_gold') {
+            const take = Math.min(rem, it.count);
+            it.count -= take;
+            rem -= take;
+            if (it.count <= 0) this.inventory[i] = null;
+          }
+        }
+        return true;
       }
       update(now) {
         if (!this.isMoving) return;
@@ -548,90 +944,42 @@
       }
     }
 
-    class WorldMap {
-      constructor(w = 30, h = 30) {
-        this.width = w; this.height = h;
-        this.tiles = [];
-        this.monsters = [];
-        this.initMap();
-      }
-      initMap() {
-        for (let y = 0; y < this.height; y++) {
-          this.tiles[y] = [];
-          for (let x = 0; x < this.width; x++) {
-            const isBorder = x === 0 || y === 0 || x === this.width - 1 || y === this.height - 1;
-            const isDungeon = x >= 15 && x <= 25 && y >= 4 && y <= 14;
-            const isDungeonWall = isDungeon && (x === 15 || x === 25 || y === 4 || y === 14) && !(x === 15 && y === 9);
-            const wall = isBorder || isDungeonWall || (x === 10 && y >= 5 && y <= 10 && y !== 8);
-            this.tiles[y][x] = {
-              ground: isDungeon ? 'tile_stone' : 'tile_grass',
-              wall: wall ? 'wall_brick' : null,
-              walkable: !wall,
-              items: []
-            };
-          }
-        }
-        // Baú de Tesouro inicial com itens
-        this.tiles[6][9].items.push(new Item({
-          id: 'obj_chest', name: 'Baú de Tesouro', type: 'container', pickupable: false,
-          contents: [
-            new Item({ id: 'item_potion', name: 'Poção de Vida', type: 'consumable', stackable: true, count: 3, stats: { healAmount: 50 } }),
-            new Item({ id: 'item_gold', name: 'Gold Coin', type: 'valuables', stackable: true, count: 50 })
-          ]
-        }));
-        // Espada no chão perto do jogador
-        this.tiles[8][8].items.push(new Item({ id: 'item_sword', name: 'Espada Longa', type: 'weapon', stats: { atk: 14, def: 2 } }));
-
-        // Spawna Orcs
-        const spawns = [[12, 7], [18, 8], [21, 10], [13, 15], [8, 16]];
-        spawns.forEach(([sx, sy], idx) => {
-          this.monsters.push(new Monster({
-            id: 'orc_' + idx,
-            name: idx === 2 ? 'Orc Warlord' : 'Orc Warrior',
-            x: sx, y: sy,
-            hp: idx === 2 ? 120 : 80,
-            maxHp: idx === 2 ? 120 : 80,
-            attack: idx === 2 ? 20 : 14,
-            xpValue: idx === 2 ? 90 : 45
-          }));
-        });
-      }
-      isBounds(x, y) { return x >= 0 && y >= 0 && x < this.width && y < this.height; }
-      isWalkable(x, y, ignoreEntity = null) {
-        if (!this.isBounds(x, y)) return false;
-        if (!this.tiles[y][x].walkable) return false;
-        for (const m of this.monsters) {
-          if (m !== ignoreEntity && m.x === x && m.y === y) return false;
-        }
-        return true;
-      }
-    }
-
-    /********************************************************************
-     * 3. ENGINE PRINCIPAL DO JOGO E REDE WEBSOCKET (Render.com)
-     ********************************************************************/
     class TibiaGame {
       constructor() {
         this.canvas = document.getElementById('game');
         this.ctx = this.canvas.getContext('2d');
         this.ctx.imageSmoothingEnabled = false;
+
+        this.lightCanvas = document.createElement('canvas');
+        this.lightCanvas.width = 480;
+        this.lightCanvas.height = 352;
+        this.lightCtx = this.lightCanvas.getContext('2d');
+
         this.sprites = new SpriteCatalog();
         this.sprites.generateAll();
 
-        this.map = new WorldMap(30, 30);
+        this.map = new WorldMap(44, 44);
         this.player = new Player();
         this.remotePlayers = new Map();
         this.floatingTexts = [];
         this.bloodEffects = [];
+        this.magicCircles = [];
         this.openContainer = null;
+        this.activeShopNpc = null;
+        this.shopMode = 'buy';
 
         this.ws = null;
         this.connected = false;
-        this.txCount = 0; this.rxCount = 0;
         this.authMode = 'login';
 
         this.bindUI();
         this.updateUI();
+        this.addLog('Bem-vindo à Cidade de Thais! Fale com Quentin no Templo, Sam na Ferraria (Oeste) ou Xodet (Sul).', '#fde047');
+
+        // Auto-detecta o endereço WebSocket se estiver rodando no Render
+        if (window.location.hostname.includes('onrender.com')) {
+          document.getElementById('server-ws-url').value = `wss://${window.location.host}`;
+        }
         this.connectWebSocket(document.getElementById('server-ws-url').value);
 
         this.lastCombatTick = performance.now();
@@ -648,24 +996,12 @@
         log.scrollTop = log.scrollHeight;
       }
 
-      logPacket(dir, pkt) {
-        if (dir === 'TX') this.txCount++; else this.rxCount++;
-        document.getElementById('net-stats-counter').textContent = `TX: ${this.txCount} | RX: ${this.rxCount}`;
-        const box = document.getElementById('net-packet-log');
-        const line = document.createElement('div');
-        line.className = dir === 'TX' ? 'text-amber-300' : 'text-emerald-300';
-        line.textContent = `[${dir}] ${JSON.stringify(pkt)}`;
-        box.appendChild(line);
-        box.scrollTop = box.scrollHeight;
-      }
-
       connectWebSocket(url) {
         const modalBadge = document.getElementById('db-conn-badge');
         const topBadge = document.getElementById('account-status-badge');
         const feedback = document.getElementById('auth-feedback');
         modalBadge.textContent = 'Conectando ao Render...';
         topBadge.textContent = 'WS: Conectando...';
-        feedback.textContent = 'Acordando servidor Render (pode levar 10s se estiver em repouso)...';
 
         try {
           if (this.ws) this.ws.close();
@@ -677,19 +1013,17 @@
             modalBadge.className = 'text-[10px] text-emerald-400 font-mono font-bold';
             topBadge.textContent = 'Render: Online';
             document.getElementById('online-dot').className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
-            feedback.textContent = 'Conectado! Clique em "Conectar ao Servidor" para entrar.';
-            this.addLog('Conectado ao servidor Render com sucesso!', '#4ade80');
+            feedback.textContent = 'Servidor conectado! Clique em "Conectar ao Servidor".';
           };
 
           this.ws.onmessage = (ev) => {
             const pkt = JSON.parse(ev.data);
-            this.logPacket('RX', pkt);
             this.handleServerPacket(pkt);
           };
 
           this.ws.onerror = () => {
-            modalBadge.textContent = 'Offline / Local';
-            feedback.textContent = 'Servidor ocupado ou iniciando. Você pode clicar em "⚡ Jogar Offline"!';
+            modalBadge.textContent = 'Modo Local Disponível';
+            feedback.textContent = 'Você pode clicar em "⚡ Jogar Offline" para entrar imediatamente!';
           };
 
           this.ws.onclose = () => {
@@ -697,14 +1031,13 @@
             topBadge.textContent = 'Modo Local';
           };
         } catch (e) {
-          feedback.textContent = 'Use o botão "⚡ Jogar Offline" para jogar imediatamente.';
+          feedback.textContent = 'Clique em "⚡ Jogar Offline" para iniciar imediatamente.';
         }
       }
 
       sendPacket(pkt) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           this.ws.send(JSON.stringify(pkt));
-          this.logPacket('TX', pkt);
         }
       }
 
@@ -717,53 +1050,45 @@
           if (pkt.character) {
             this.player.name = pkt.character.name || this.player.name;
             this.player.level = pkt.character.level || 1;
-            this.player.x = pkt.character.x ?? 7;
-            this.player.y = pkt.character.y ?? 7;
+            const sx = pkt.character.x ?? 14;
+            const sy = pkt.character.y ?? 14;
+            this.player.x = this.map.isWalkable(sx, sy) ? sx : 14;
+            this.player.y = this.map.isWalkable(sx, sy) ? sy : 14;
             this.player.renderX = this.player.x * 32;
             this.player.renderY = this.player.y * 32;
           }
           this.remotePlayers.clear();
           (pkt.otherPlayers || []).forEach(p => this.remotePlayers.set(p.id, p));
-          this.updateOnlineCount();
+          document.getElementById('online-players-count').textContent = `${1 + this.remotePlayers.size}/5 Online`;
           document.getElementById('account-modal').classList.add('hidden');
-          this.addLog(`Bem-vindo ao Tibia 7.4 Online, ${this.player.name}!`, '#facc15');
+          this.addLog(`Conectado ao servidor como ${this.player.name}!`, '#4ade80');
           this.updateUI();
         } else if (pkt.type === 'PLAYER_JOIN') {
           this.remotePlayers.set(pkt.player.id, pkt.player);
-          this.updateOnlineCount();
-          this.addLog(`${pkt.player.name} entrou no mundo.`, '#60a5fa');
+          document.getElementById('online-players-count').textContent = `${1 + this.remotePlayers.size}/5 Online`;
+          this.addLog(`${pkt.player.name} entrou em Thais.`, '#60a5fa');
         } else if (pkt.type === 'PLAYER_MOVED') {
           const rp = this.remotePlayers.get(pkt.id);
           if (rp) { rp.x = pkt.x; rp.y = pkt.y; rp.direction = pkt.direction; }
         } else if (pkt.type === 'PLAYER_LEAVE') {
           this.remotePlayers.delete(pkt.id);
-          this.updateOnlineCount();
-          this.addLog(`${pkt.name || 'Um jogador'} saiu do jogo.`, '#9ca3af');
+          document.getElementById('online-players-count').textContent = `${1 + this.remotePlayers.size}/5 Online`;
         } else if (pkt.type === 'CHAT_MESSAGE') {
-          this.addLog(`${pkt.sender} [Lv.${pkt.level || 1}]: ${pkt.text}`, '#fde047');
+          this.addLog(`${pkt.sender}: ${pkt.text}`, '#fde047');
           this.addFloatingText((pkt.x || this.player.x) * 32 + 16, (pkt.y || this.player.y) * 32, pkt.text, '#fde047');
         } else if (pkt.type === 'SAVE_SUCCESS') {
-          this.addLog('Personagem salvo no banco de dados do servidor!', '#4ade80');
+          this.addLog('Personagem salvo no servidor Render!', '#4ade80');
         }
       }
 
-      updateOnlineCount() {
-        const total = 1 + this.remotePlayers.size;
-        document.getElementById('online-players-count').textContent = `${total}/5 Online`;
-      }
-
       bindUI() {
-        // Botão Jogar Offline (Funciona sempre, imediatamente!)
         document.getElementById('btn-quick-guest').addEventListener('click', () => {
-          const charName = document.getElementById('auth-username').value || 'Knight Hero';
-          this.player.name = charName;
+          this.player.name = document.getElementById('auth-username').value || 'Knight Hero';
           document.getElementById('account-modal').classList.add('hidden');
-          document.getElementById('account-status-badge').textContent = 'Modo Offline Ativo';
-          this.addLog(`Iniciando sessão local como ${this.player.name}. Bom jogo!`, '#4ade80');
+          document.getElementById('account-status-badge').textContent = 'Sessão Local';
           this.updateUI();
         });
 
-        // Alternar abas Login / Criar Conta
         document.getElementById('tab-auth-login').addEventListener('click', () => {
           this.authMode = 'login';
           document.getElementById('tab-auth-login').classList.add('active', 'text-amber-300');
@@ -777,12 +1102,10 @@
           document.getElementById('register-extra-fields').classList.remove('hidden');
         });
 
-        // Reconectar ao Render
         document.getElementById('btn-reconnect-server').addEventListener('click', () => {
           this.connectWebSocket(document.getElementById('server-ws-url').value.trim());
         });
 
-        // Submit do Formulário de Login/Registro
         document.getElementById('auth-form').addEventListener('submit', (e) => {
           e.preventDefault();
           const username = document.getElementById('auth-username').value.trim();
@@ -790,8 +1113,7 @@
           if (this.connected) {
             if (this.authMode === 'register') {
               this.sendPacket({
-                type: 'AUTH_REGISTER',
-                username, password,
+                type: 'AUTH_REGISTER', username, password,
                 charName: document.getElementById('auth-charname').value.trim(),
                 vocation: document.getElementById('auth-vocation').value
               });
@@ -801,12 +1123,10 @@
           } else {
             this.player.name = username || 'Knight Hero';
             document.getElementById('account-modal').classList.add('hidden');
-            this.addLog(`Servidor ainda iniciando. Entrando em modo local como ${this.player.name}!`, '#facc15');
             this.updateUI();
           }
         });
 
-        // Teclado WASD / Setas / Hotkeys
         window.addEventListener('keydown', (e) => {
           if (document.activeElement.tagName === 'INPUT') return;
           const mapKeys = {
@@ -820,44 +1140,59 @@
             this.player.pathQueue = [];
             const [dx, dy, dir] = mapKeys[e.code];
             this.tryStep(dx, dy, dir);
-          } else if (e.key === 'F1') { e.preventDefault(); this.usePotion(); }
-          else if (e.key === 'F2') { e.preventDefault(); this.castSpell('exura'); }
-          else if (e.key === 'F3') { e.preventDefault(); this.castSpell('exori'); }
+          } else if (e.key === 'F1') { e.preventDefault(); this.useConsumable('item_potion'); }
+          else if (e.key === 'F2') { e.preventDefault(); this.useConsumable('item_mana_potion'); }
+          else if (e.key === 'F3') { e.preventDefault(); this.castSpell('exura'); }
+          else if (e.key === 'F4') { e.preventDefault(); this.castSpell('exori'); }
+          else if (e.key === 'F5') { e.preventDefault(); this.castSpell('utevo lux'); }
         });
 
-        // Botões D-Pad
         document.querySelectorAll('[data-move]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const dirs = { N:[0,-1], S:[0,1], W:[-1,0], E:[1,0], NW:[-1,-1], NE:[1,-1], SW:[-1,1], SE:[1,1] };
+            const dirs = { N:[0,-1,'N'], S:[0,1,'S'], W:[-1,0,'W'], E:[1,0,'E'], NW:[-1,-1,'W'], NE:[1,-1,'E'], SW:[-1,1,'W'], SE:[1,1,'E'] };
             const m = btn.getAttribute('data-move');
             this.player.pathQueue = [];
-            this.tryStep(dirs[m][0], dirs[m][1], m[0]);
+            this.tryStep(dirs[m][0], dirs[m][1], dirs[m][2]);
           });
         });
 
-        // Clique Esquerdo no Canvas (Atacar Monstro ou Andar A*)
+        // Clique Esquerdo no Mapa: Interagir com NPC, Atacar Monstro ou Andar A*
         this.canvas.addEventListener('click', (e) => {
           const { tx, ty } = this.getCanvasTile(e);
           if (!this.map.isBounds(tx, ty)) return;
+
+          const clickedNpc = this.map.npcs.find(n => n.x === tx && n.y === ty);
+          if (clickedNpc) {
+            this.interactWithNPC(clickedNpc);
+            return;
+          }
+
           const clickedMonster = this.map.monsters.find(m => m.x === tx && m.y === ty);
           if (clickedMonster) {
             this.player.target = this.player.target === clickedMonster ? null : clickedMonster;
-            if (this.player.target) this.addLog(`Alvo selecionado: ${clickedMonster.name}.`, '#f87171');
+            if (this.player.target) this.addLog(`Atacando ${clickedMonster.name}!`, '#f87171');
             this.updateUI();
             return;
           }
-          // Calcula caminho A*
+
           this.player.pathQueue = this.findPath(this.player.x, this.player.y, tx, ty);
         });
 
-        // Clique Direito no Canvas (Pegar Item ou Abrir Baú/Corpo)
+        // Clique Direito no Mapa: Falar com NPC, Abrir Baú ou Pegar Item
         this.canvas.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           const { tx, ty } = this.getCanvasTile(e);
           if (!this.map.isBounds(tx, ty)) return;
+
+          const clickedNpc = this.map.npcs.find(n => n.x === tx && n.y === ty);
+          if (clickedNpc) {
+            this.interactWithNPC(clickedNpc);
+            return;
+          }
+
           const dist = Math.max(Math.abs(tx - this.player.x), Math.abs(ty - this.player.y));
           if (dist > 1) {
-            this.addLog('Você está muito longe desse objeto.', '#f87171');
+            this.addLog('Aproxime-se para alcançar este objeto.', '#f87171');
             return;
           }
           const tileItems = this.map.tiles[ty][tx].items;
@@ -866,7 +1201,6 @@
           if (topItem.type === 'container') {
             this.openContainer = topItem;
             this.renderContainer();
-            this.addLog(`Você abriu ${topItem.name}.`, '#facc15');
           } else if (topItem.pickupable) {
             if (this.addItemToInventory(topItem)) {
               tileItems.pop();
@@ -876,16 +1210,29 @@
           }
         });
 
-        // Hotkeys na Barra Superior
-        document.getElementById('btn-hotkey-potion').addEventListener('click', () => this.usePotion());
+        // Abas da Loja NPC
+        document.getElementById('tab-shop-buy').addEventListener('click', () => {
+          this.shopMode = 'buy';
+          document.getElementById('tab-shop-buy').classList.add('active');
+          document.getElementById('tab-shop-sell').classList.remove('active');
+          this.renderShopWindow();
+        });
+        document.getElementById('tab-shop-sell').addEventListener('click', () => {
+          this.shopMode = 'sell';
+          document.getElementById('tab-shop-sell').classList.add('active');
+          document.getElementById('tab-shop-buy').classList.remove('active');
+          this.renderShopWindow();
+        });
+        document.getElementById('btn-close-shop').addEventListener('click', () => {
+          this.activeShopNpc = null;
+          document.getElementById('shop-panel').classList.add('hidden');
+        });
+
+        document.getElementById('btn-hotkey-potion').addEventListener('click', () => this.useConsumable('item_potion'));
+        document.getElementById('btn-hotkey-mana').addEventListener('click', () => this.useConsumable('item_mana_potion'));
         document.getElementById('btn-hotkey-exura').addEventListener('click', () => this.castSpell('exura'));
         document.getElementById('btn-hotkey-exori').addEventListener('click', () => this.castSpell('exori'));
-        document.getElementById('btn-net-inspector').addEventListener('click', () => {
-          document.getElementById('net-inspector-panel').classList.toggle('hidden');
-        });
-        document.getElementById('btn-close-net').addEventListener('click', () => {
-          document.getElementById('net-inspector-panel').classList.add('hidden');
-        });
+        document.getElementById('btn-hotkey-lux').addEventListener('click', () => this.castSpell('utevo lux'));
         document.getElementById('btn-open-account').addEventListener('click', () => {
           document.getElementById('account-modal').classList.remove('hidden');
         });
@@ -895,23 +1242,130 @@
         });
         document.getElementById('btn-save-db').addEventListener('click', () => this.saveProgress());
 
-        // Chat e Magias
+        // Chat + Comandos de NPC ("hi", "trade", "heal")
         document.getElementById('chat-form').addEventListener('submit', (e) => {
           e.preventDefault();
           const input = document.getElementById('chat-input');
           const txt = input.value.trim();
           if (!txt) return;
           input.value = '';
-          if (txt.toLowerCase() === 'exura' || txt.toLowerCase() === 'exori') {
-            this.castSpell(txt.toLowerCase());
-          } else if (txt.toLowerCase() === '/save') {
-            this.saveProgress();
-          } else {
-            this.addLog(`${this.player.name}: ${txt}`, '#fde047');
-            this.addFloatingText(this.player.renderX + 16, this.player.renderY, txt, '#fde047');
-            this.sendPacket({ type: 'PLAYER_CHAT', text: txt });
+          const lower = txt.toLowerCase();
+
+          if (['exura', 'exori', 'utevo lux'].includes(lower)) {
+            this.castSpell(lower);
+            return;
           }
+          if (['hi', 'hello', 'trade', 'heal'].includes(lower)) {
+            const nearNpc = this.map.npcs.find(n => Math.max(Math.abs(n.x - this.player.x), Math.abs(n.y - this.player.y)) <= 4);
+            if (nearNpc) {
+              this.interactWithNPC(nearNpc);
+              return;
+            }
+          }
+          this.addLog(`${this.player.name}: ${txt}`, '#fde047');
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, txt, '#fde047');
+          this.sendPacket({ type: 'PLAYER_CHAT', text: txt });
         });
+      }
+
+      interactWithNPC(npc) {
+        const dist = Math.max(Math.abs(npc.x - this.player.x), Math.abs(npc.y - this.player.y));
+        if (dist > 4) {
+          this.addLog(`Chegue mais perto de ${npc.name} para conversar.`, '#f87171');
+          this.player.pathQueue = this.findPath(this.player.x, this.player.y, npc.x, npc.y + 1);
+          return;
+        }
+        this.addLog(`${npc.name}: "${npc.greeting}"`, '#38bdf8');
+        this.addFloatingText(npc.x * 32 + 16, npc.y * 32, 'Hi!', '#38bdf8');
+
+        if (npc.heals) {
+          this.player.hp = this.player.maxHp;
+          this.player.mp = this.player.maxMp;
+          this.magicCircles.push({ x: this.player.x, y: this.player.y, color: '#38bdf8', time: performance.now() });
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, 'FULL HEAL!', '#4ade80');
+          this.updateUI();
+        }
+
+        if (npc.shopItems && npc.shopItems.length > 0) {
+          this.activeShopNpc = npc;
+          this.shopMode = 'buy';
+          document.getElementById('tab-shop-buy').classList.add('active');
+          document.getElementById('tab-shop-sell').classList.remove('active');
+          this.renderShopWindow();
+        }
+      }
+
+      renderShopWindow() {
+        const panel = document.getElementById('shop-panel');
+        const list = document.getElementById('shop-items-list');
+        if (!this.activeShopNpc) { panel.classList.add('hidden'); return; }
+        panel.classList.remove('hidden');
+        document.getElementById('shop-npc-title').textContent = `Loja: ${this.activeShopNpc.name}`;
+        list.innerHTML = '';
+
+        if (this.shopMode === 'buy') {
+          this.activeShopNpc.shopItems.forEach(itemId => {
+            const tpl = ITEM_DATABASE[itemId];
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between p-1 bg-[#161616] border border-neutral-800';
+            row.innerHTML = `
+              <div class="flex items-center gap-1.5">
+                <img src="${this.sprites.images[tpl.spriteId].src}" class="w-6 h-6" style="image-rendering:pixelated"/>
+                <div>
+                  <div class="text-[11px] font-bold text-neutral-200">${tpl.name}</div>
+                  <div class="text-[9px] text-amber-400">${tpl.buyPrice} gp</div>
+                </div>
+              </div>
+              <button class="tibia-btn text-[10px] text-emerald-300">Comprar</button>
+            `;
+            row.querySelector('button').addEventListener('click', () => {
+              if (!this.player.spendGold(tpl.buyPrice)) {
+                this.addLog(`Ouro insuficiente! ${tpl.name} custa ${tpl.buyPrice} gp.`, '#f87171');
+                return;
+              }
+              const newItem = createItemInstance(itemId, 1);
+              if (this.addItemToInventory(newItem)) {
+                this.addLog(`Você comprou ${tpl.name} por ${tpl.buyPrice} gp.`, '#4ade80');
+              } else {
+                this.addItemToInventory(createItemInstance('item_gold', tpl.buyPrice));
+              }
+              this.updateUI();
+            });
+            list.appendChild(row);
+          });
+        } else {
+          // Modo Vender itens da mochila
+          let hasSellable = false;
+          this.player.inventory.forEach((invItem, slotIdx) => {
+            if (!invItem || invItem.id === 'item_gold') return;
+            hasSellable = true;
+            const price = invItem.sellPrice || 20;
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between p-1 bg-[#161616] border border-neutral-800';
+            row.innerHTML = `
+              <div class="flex items-center gap-1.5">
+                <img src="${this.sprites.images[invItem.spriteId].src}" class="w-6 h-6" style="image-rendering:pixelated"/>
+                <div>
+                  <div class="text-[11px] font-bold text-neutral-200">${invItem.name} ${invItem.count > 1 ? `(x${invItem.count})` : ''}</div>
+                  <div class="text-[9px] text-amber-400">+${price} gp</div>
+                </div>
+              </div>
+              <button class="tibia-btn text-[10px] text-amber-300">Vender 1x</button>
+            `;
+            row.querySelector('button').addEventListener('click', () => {
+              invItem.count--;
+              if (invItem.count <= 0) this.player.inventory[slotIdx] = null;
+              this.addItemToInventory(createItemInstance('item_gold', price));
+              this.addLog(`Você vendeu ${invItem.name} por ${price} gp!`, '#facc15');
+              this.renderShopWindow();
+              this.updateUI();
+            });
+            list.appendChild(row);
+          });
+          if (!hasSellable) {
+            list.innerHTML = `<div class="text-[10px] text-neutral-500 text-center py-3">Nenhum item para vender na mochila.</div>`;
+          }
+        }
       }
 
       getCanvasTile(e) {
@@ -920,10 +1374,7 @@
         const scaleY = this.canvas.height / rect.height;
         const cx = Math.floor(((e.clientX - rect.left) * scaleX) / 32);
         const cy = Math.floor(((e.clientY - rect.top) * scaleY) / 32);
-        return {
-          tx: this.player.x - 7 + cx,
-          ty: this.player.y - 5 + cy
-        };
+        return { tx: this.player.x - 7 + cx, ty: this.player.y - 5 + cy };
       }
 
       findPath(sx, sy, gx, gy) {
@@ -931,7 +1382,7 @@
         const queue = [[{ x: sx, y: sy }]];
         const visited = new Set([`${sx},${sy}`]);
         const dirs = [[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
-        while (queue.length > 0) {
+        while (queue.length > 0 && queue.length < 250) {
           const path = queue.shift();
           const curr = path[path.length - 1];
           if (curr.x === gx && curr.y === gy) return path.slice(1);
@@ -949,32 +1400,58 @@
 
       tryStep(dx, dy, dir = 'S') {
         if (this.player.isMoving) return;
+        if (dx < 0) dir = 'W'; else if (dx > 0) dir = 'E';
+        else if (dy < 0) dir = 'N'; else if (dy > 0) dir = 'S';
         this.player.direction = dir;
         const nx = this.player.x + dx;
         const ny = this.player.y + dy;
         if (!this.map.isWalkable(nx, ny)) return;
+
         this.player.startX = this.player.renderX;
         this.player.startY = this.player.renderY;
         this.player.x = nx;
         this.player.y = ny;
         this.player.isMoving = true;
         this.player.moveStartTime = performance.now();
+
         document.getElementById('coords-display').textContent = `Pos: (${nx}, ${ny})`;
+        this.updateZoneBadge();
         this.sendPacket({ type: 'PLAYER_MOVE', x: nx, y: ny, direction: dir });
       }
 
-      usePotion() {
-        const slotIdx = this.player.inventory.findIndex(it => it && it.id === 'item_potion');
+      updateZoneBadge() {
+        const tile = this.map.tiles[this.player.y][this.player.x];
+        const badge = document.getElementById('zone-badge');
+        if (tile.pz) {
+          badge.textContent = '🛡️ Protection Zone (Seguro)';
+          badge.className = 'text-[10px] bg-sky-950/90 px-1.5 py-0.5 border border-sky-500 text-sky-200 font-mono';
+        } else if (tile.isDungeon) {
+          badge.textContent = '💀 Orc Dungeon (Perigo)';
+          badge.className = 'text-[10px] bg-rose-950/90 px-1.5 py-0.5 border border-rose-500 text-rose-200 font-mono';
+        } else {
+          badge.textContent = '🌲 Thais / Campos de Caça';
+          badge.className = 'text-[10px] bg-emerald-950/90 px-1.5 py-0.5 border border-emerald-600 text-emerald-200 font-mono';
+        }
+      }
+
+      useConsumable(itemId) {
+        const slotIdx = this.player.inventory.findIndex(it => it && it.id === itemId);
         if (slotIdx === -1) {
-          this.addLog('Você não tem Poções de Vida na mochila!', '#f87171');
+          this.addLog('Você não possui essa poção na mochila!', '#f87171');
           return;
         }
         const pot = this.player.inventory[slotIdx];
-        this.player.hp = Math.min(this.player.maxHp, this.player.hp + pot.stats.healAmount);
+        if (pot.stats.healAmount) {
+          this.player.hp = Math.min(this.player.maxHp, this.player.hp + pot.stats.healAmount);
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, `+${pot.stats.healAmount} HP`, '#4ade80');
+        }
+        if (pot.stats.manaAmount) {
+          this.player.mp = Math.min(this.player.maxMp, this.player.mp + pot.stats.manaAmount);
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, `+${pot.stats.manaAmount} MP`, '#60a5fa');
+        }
+        this.magicCircles.push({ x: this.player.x, y: this.player.y, color: '#38bdf8', time: performance.now() });
         pot.count--;
         if (pot.count <= 0) this.player.inventory[slotIdx] = null;
-        this.addFloatingText(this.player.renderX + 16, this.player.renderY, `+${pot.stats.healAmount}`, '#4ade80');
-        this.addLog('Aaaah... Você usou uma Poção de Vida (+50 HP).', '#4ade80');
         this.updateUI();
       }
 
@@ -982,34 +1459,41 @@
         if (spell === 'exura') {
           if (this.player.mp < 20) { this.addLog('Mana insuficiente (20 MP).', '#f87171'); return; }
           this.player.mp -= 20;
-          this.player.hp = Math.min(this.player.maxHp, this.player.hp + 35);
-          this.addFloatingText(this.player.renderX + 16, this.player.renderY, 'exura +35', '#38bdf8');
-          this.addLog('Você pronunciou "exura" (+35 HP).', '#38bdf8');
+          this.player.hp = Math.min(this.player.maxHp, this.player.hp + 40);
+          this.magicCircles.push({ x: this.player.x, y: this.player.y, color: '#38bdf8', time: performance.now() });
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, 'exura +40', '#38bdf8');
         } else if (spell === 'exori') {
           if (this.player.mp < 30) { this.addLog('Mana insuficiente (30 MP).', '#f87171'); return; }
           this.player.mp -= 30;
           this.addFloatingText(this.player.renderX + 16, this.player.renderY, 'EXORI!', '#facc15');
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              this.magicCircles.push({ x: this.player.x + dx, y: this.player.y + dy, color: '#f97316', time: performance.now() });
+            }
+          }
           this.map.monsters.slice().forEach(m => {
             if (Math.max(Math.abs(m.x - this.player.x), Math.abs(m.y - this.player.y)) <= 1) {
-              this.dealDamageToMonster(m, 28);
+              this.dealDamageToMonster(m, 34);
             }
           });
+        } else if (spell === 'utevo lux') {
+          if (this.player.mp < 15) { this.addLog('Mana insuficiente (15 MP).', '#f87171'); return; }
+          this.player.mp -= 15;
+          this.player.lightBuffUntil = performance.now() + 60000;
+          this.addFloatingText(this.player.renderX + 16, this.player.renderY, 'utevo lux!', '#fde047');
+          this.addLog('Uma aura luminosa ilumina seu caminho por 60 segundos.', '#fde047');
         }
         this.updateUI();
       }
 
       saveProgress() {
-        localStorage.setItem('tibia74_char', JSON.stringify({
-          name: this.player.name, level: this.player.level, xp: this.player.xp,
-          x: this.player.x, y: this.player.y
-        }));
         if (this.connected) {
           this.sendPacket({
             type: 'SAVE_CHARACTER',
             characterData: { name: this.player.name, level: this.player.level, xp: this.player.xp, x: this.player.x, y: this.player.y }
           });
         } else {
-          this.addLog('Progresso salvo localmente no navegador!', '#4ade80');
+          this.addLog('Progresso salvo na sessão local!', '#4ade80');
         }
       }
 
@@ -1061,12 +1545,21 @@
         monster.hp -= dmg;
         this.bloodEffects.push({ x: monster.x, y: monster.y, time: performance.now() });
         this.addFloatingText(monster.renderX + 16, monster.renderY, `-${dmg}`, '#ef4444');
-        this.addLog(`Você causou ${dmg} de dano em ${monster.name}.`, '#fca5a5');
 
         if (monster.hp <= 0) {
-          this.addLog(`${monster.name} morreu! Você ganhou ${monster.xpValue} XP.`, '#facc15');
+          this.addLog(`${monster.name} derrotado! (+${monster.xpValue} XP)`, '#facc15');
           if (this.player.target === monster) this.player.target = null;
           this.map.monsters = this.map.monsters.filter(m => m !== monster);
+
+          // Respawn automático após 18 segundos
+          setTimeout(() => {
+            monster.hp = monster.maxHp;
+            monster.x = monster.spawnX; monster.y = monster.spawnY;
+            monster.renderX = monster.x * 32; monster.renderY = monster.y * 32;
+            this.map.monsters.push(monster);
+            this.updateUI();
+          }, 18000);
+
           this.player.xp += monster.xpValue;
           if (this.player.xp >= this.player.nextLevelXp) {
             this.player.level++;
@@ -1075,16 +1568,17 @@
             this.player.maxHp += 25; this.player.hp = this.player.maxHp;
             this.player.maxMp += 15; this.player.mp = this.player.maxMp;
             this.addFloatingText(this.player.renderX + 16, this.player.renderY, `LEVEL ${this.player.level}!`, '#facc15');
-            this.addLog(`Parabéns! Você avançou para o Nível ${this.player.level}!`, '#4ade80');
+            this.addLog(`Você avançou para o Level ${this.player.level}!`, '#4ade80');
           }
-          // Cria corpo com Loot no chão
-          this.map.tiles[monster.y][monster.x].items.push(new Item({
-            id: 'obj_corpse', name: `Corpo de ${monster.name}`, type: 'container', pickupable: false,
-            contents: [
-              new Item({ id: 'item_gold', name: 'Gold Coin', type: 'valuables', stackable: true, count: Math.floor(Math.random() * 20) + 8 }),
-              new Item({ id: 'item_potion', name: 'Poção de Vida', type: 'consumable', stackable: true, count: 1, stats: { healAmount: 50 } })
-            ]
-          }));
+
+          const corpse = createItemInstance('item_gold', 1);
+          corpse.id = 'obj_corpse'; corpse.name = `Corpo de ${monster.name}`; corpse.spriteId = 'obj_corpse';
+          corpse.type = 'container'; corpse.pickupable = false;
+          corpse.contents = [
+            createItemInstance('item_gold', Math.floor(Math.random() * 25) + 12),
+            createItemInstance(Math.random() > 0.45 ? 'item_potion' : 'item_sword', 1)
+          ];
+          this.map.tiles[monster.y][monster.x].items.push(corpse);
         }
         this.updateUI();
       }
@@ -1100,8 +1594,8 @@
         document.getElementById('xp-bar').style.width = `${(this.player.xp / this.player.nextLevelXp) * 100}%`;
         document.getElementById('stat-atk').textContent = this.player.getTotalAtk();
         document.getElementById('stat-def').textContent = this.player.getTotalDef();
+        document.getElementById('stat-gold').textContent = `${this.player.getGoldCount()} gp`;
 
-        // Slots de Equipamento
         ['weapon', 'head', 'body', 'shield'].forEach(slotName => {
           const el = document.getElementById(`equip-${slotName}`);
           const eq = this.player.equipment[slotName];
@@ -1115,10 +1609,19 @@
           }
         });
 
-        // Battle List
+        // Battle List (NPCs + Monstros)
         const bList = document.getElementById('battle-list');
         bList.innerHTML = '';
-        document.getElementById('battle-count').textContent = `${this.map.monsters.length} monstros`;
+        document.getElementById('battle-count').textContent = `${this.map.npcs.length + this.map.monsters.length} entidades`;
+
+        this.map.npcs.forEach(npc => {
+          const row = document.createElement('div');
+          row.className = 'p-1 cursor-pointer border border-transparent hover:bg-sky-950/40 flex justify-between items-center text-[11px]';
+          row.innerHTML = `<span class="text-sky-300 font-semibold">💬 ${npc.name}</span><span class="text-[9px] text-neutral-400">${npc.role}</span>`;
+          row.addEventListener('click', () => this.interactWithNPC(npc));
+          bList.appendChild(row);
+        });
+
         this.map.monsters.forEach(m => {
           const row = document.createElement('div');
           const isTarget = this.player.target === m;
@@ -1126,7 +1629,7 @@
           const pct = Math.max(0, Math.round((m.hp / m.maxHp) * 100));
           row.innerHTML = `
             <div class="flex justify-between text-[11px]">
-              <span class="${isTarget ? 'text-red-400 font-bold' : 'text-neutral-200'}">${m.name}</span>
+              <span class="${isTarget ? 'text-red-400 font-bold' : 'text-neutral-200'}">⚔️ ${m.name}</span>
               <span class="font-mono text-[10px]">${pct}%</span>
             </div>
             <div class="w-full h-1.5 bg-black mt-0.5"><div class="h-full bg-emerald-500" style="width:${pct}%"></div></div>
@@ -1138,14 +1641,13 @@
           bList.appendChild(row);
         });
 
-        // Inventário 20 Slots
         const invGrid = document.getElementById('inventory-grid');
         invGrid.innerHTML = '';
         this.player.inventory.forEach((item, idx) => {
           const slot = document.createElement('div');
           slot.className = 'item-slot';
           if (item) {
-            slot.title = `${item.name} (Clique Dir p/ Usar ou Equipar)`;
+            slot.title = `${item.name} (Clique Dir: Usar/Equipar)`;
             const img = document.createElement('img');
             img.src = this.sprites.images[item.spriteId].src;
             slot.appendChild(img);
@@ -1157,7 +1659,7 @@
             slot.addEventListener('contextmenu', (e) => {
               e.preventDefault();
               if (item.type === 'consumable') {
-                this.usePotion();
+                this.useConsumable(item.id);
               } else if (['weapon', 'shield', 'head', 'body'].includes(item.type)) {
                 const prev = this.player.equipment[item.type];
                 this.player.equipment[item.type] = item;
@@ -1179,41 +1681,51 @@
         this.player.update(now);
         this.map.monsters.forEach(m => m.update(now));
 
-        // Executa próximo passo da fila A* Auto-Walk
         if (!this.player.isMoving && this.player.pathQueue.length > 0) {
           const next = this.player.pathQueue.shift();
           this.tryStep(next.x - this.player.x, next.y - this.player.y, 'S');
         }
 
-        // Turno de Auto-Attack (1500ms)
-        if (now - this.lastCombatTick >= 1500) {
+        // Turno de Combate do Jogador
+        if (now - this.lastCombatTick >= 1400) {
           this.lastCombatTick = now;
-          if (this.player.target) {
+          if (this.player.target && !this.map.tiles[this.player.y][this.player.x].pz) {
             const dist = Math.max(Math.abs(this.player.target.x - this.player.x), Math.abs(this.player.target.y - this.player.y));
             if (dist <= 1) {
-              const dmg = Math.max(1, this.player.getTotalAtk() - Math.floor(Math.random() * this.player.target.defense));
+              const dmg = Math.max(2, this.player.getTotalAtk() - Math.floor(Math.random() * this.player.target.defense));
               this.dealDamageToMonster(this.player.target, dmg);
             }
           }
         }
 
-        // Turno da IA dos Monstros (1000ms)
+        // IA dos Monstros (Respeitando Protection Zone)
         if (now - this.lastMonsterTick >= 1000) {
           this.lastMonsterTick = now;
+          const playerInPZ = this.map.tiles[this.player.y][this.player.x].pz;
+
           this.map.monsters.forEach(m => {
-            if (m.isMoving) return;
+            if (m.isMoving || playerInPZ) return;
             const dist = Math.max(Math.abs(this.player.x - m.x), Math.abs(this.player.y - m.y));
             if (dist === 1) {
-              const dmg = Math.max(1, m.attack - Math.floor(Math.random() * (this.player.getTotalDef() * 0.6)));
-              this.player.hp = Math.max(1, this.player.hp - dmg);
+              const dmg = Math.max(1, m.attack - Math.floor(Math.random() * (this.player.getTotalDef() * 0.65)));
+              this.player.hp -= dmg;
               this.bloodEffects.push({ x: this.player.x, y: this.player.y, time: now });
               this.addFloatingText(this.player.renderX + 16, this.player.renderY, `-${dmg}`, '#ef4444');
+              if (this.player.hp <= 0) {
+                this.player.hp = this.player.maxHp;
+                this.player.x = 14; this.player.y = 14;
+                this.player.renderX = 14 * 32; this.player.renderY = 14 * 32;
+                this.player.target = null;
+                this.addLog('Você desmaiou em combate e foi resgatado por Quentin no Templo!', '#f87171');
+                this.updateZoneBadge();
+              }
               this.updateUI();
             } else if (dist <= m.aggroRange) {
               const dx = Math.sign(this.player.x - m.x);
               const dy = Math.sign(this.player.y - m.y);
-              if (this.map.isWalkable(m.x + dx, m.y + dy, m) && !(m.x + dx === this.player.x && m.y + dy === this.player.y)) {
-                m.startMove(m.x + dx, m.y + dy);
+              const dir = dx < 0 ? 'W' : dx > 0 ? 'E' : dy < 0 ? 'N' : 'S';
+              if (this.map.isWalkable(m.x + dx, m.y + dy, m, true) && !(m.x + dx === this.player.x && m.y + dy === this.player.y)) {
+                m.startMove(m.x + dx, m.y + dy, dir);
               }
             }
           });
@@ -1229,15 +1741,17 @@
 
         const camX = this.player.renderX - 7 * 32;
         const camY = this.player.renderY - 5 * 32;
+        const waterFrame = Math.floor(now / 550) % 2;
 
-        // 1. Camada de Chão e Objetos
+        // 1. Camada de Chão, Água Animada, Paredes e Itens
         for (let y = 0; y < this.map.height; y++) {
           for (let x = 0; x < this.map.width; x++) {
             const sx = Math.round(x * 32 - camX);
             const sy = Math.round(y * 32 - camY);
             if (sx < -32 || sy < -32 || sx > 480 || sy > 352) continue;
             const tile = this.map.tiles[y][x];
-            ctx.drawImage(this.sprites.images[tile.ground], sx, sy);
+            const groundKey = tile.ground.startsWith('tile_water') ? `tile_water_${waterFrame}` : tile.ground;
+            ctx.drawImage(this.sprites.images[groundKey], sx, sy);
             if (tile.wall) ctx.drawImage(this.sprites.images[tile.wall], sx, sy);
             tile.items.forEach(it => ctx.drawImage(this.sprites.images[it.spriteId], sx, sy));
           }
@@ -1246,27 +1760,48 @@
         // Marcadores de Rota A*
         this.player.pathQueue.forEach(step => {
           ctx.strokeStyle = 'rgba(74, 222, 128, 0.75)';
-          ctx.strokeRect(step.x * 32 - camX + 8, step.y * 32 - camY + 8, 16, 16);
+          ctx.strokeRect(step.x * 32 - camX + 9, step.y * 32 - camY + 9, 14, 14);
         });
 
-        // 2. Entidades Ordenadas por Eixo Y (Painter's Algorithm)
+        // 2. Círculos de Magia (exura / exori)
+        this.magicCircles = this.magicCircles.filter(mc => now - mc.time < 420);
+        this.magicCircles.forEach(mc => {
+          const sx = mc.x * 32 - camX + 16;
+          const sy = mc.y * 32 - camY + 16;
+          ctx.strokeStyle = mc.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 12 * ((now - mc.time) / 420), 0, Math.PI * 2);
+          ctx.stroke();
+        });
+
+        // 3. Entidades Ordenadas por Eixo Y (Painter's Algorithm)
         const entities = [
           { type: 'player', y: this.player.renderY, ref: this.player },
+          ...this.map.npcs.map(n => ({ type: 'npc', y: n.y * 32, ref: n })),
           ...this.map.monsters.map(m => ({ type: 'monster', y: m.renderY, ref: m })),
           ...Array.from(this.remotePlayers.values()).map(r => ({ type: 'remote', y: r.y * 32, ref: r }))
         ].sort((a, b) => a.y - b.y);
 
         entities.forEach(ent => {
-          if (ent.type === 'monster') {
+          if (ent.type === 'npc') {
+            const n = ent.ref;
+            const sx = Math.round(n.x * 32 - camX);
+            const sy = Math.round(n.y * 32 - camY);
+            ctx.drawImage(this.sprites.images[n.spriteId], sx, sy);
+            this.drawNameAndBar(ctx, sx, sy, n.name, 1, '#38bdf8', false);
+          } else if (ent.type === 'monster') {
             const m = ent.ref;
             const sx = Math.round(m.renderX - camX);
             const sy = Math.round(m.renderY - camY);
             if (this.player.target === m) {
-              ctx.strokeStyle = Math.floor(now / 200) % 2 === 0 ? '#ef4444' : '#991b1b';
+              ctx.strokeStyle = Math.floor(now / 180) % 2 === 0 ? '#ef4444' : '#991b1b';
               ctx.lineWidth = 2;
               ctx.strokeRect(sx + 1, sy + 1, 30, 30);
             }
-            ctx.drawImage(this.sprites.images['spr_orc'], sx, sy);
+            const stepFrame = m.isMoving ? (Math.floor(now / 110) % 2) + 1 : 0;
+            const sprKey = m.spriteBase === 'spr_warlord' ? 'spr_warlord' : `spr_orc_${m.direction || 'S'}_${stepFrame}`;
+            ctx.drawImage(this.sprites.images[sprKey], sx, sy);
             this.drawNameAndBar(ctx, sx, sy, m.name, m.hp / m.maxHp);
           } else if (ent.type === 'remote') {
             const r = ent.ref;
@@ -1277,25 +1812,59 @@
           } else {
             const sx = Math.round(this.player.renderX - camX);
             const sy = Math.round(this.player.renderY - camY);
-            ctx.drawImage(this.sprites.images['spr_player'], sx, sy);
+            const stepFrame = this.player.isMoving ? (Math.floor(now / 95) % 2) + 1 : 0;
+            const sprKey = `spr_player_${this.player.direction || 'S'}_${stepFrame}`;
+            ctx.drawImage(this.sprites.images[sprKey], sx, sy);
             this.drawNameAndBar(ctx, sx, sy, this.player.name, this.player.hp / this.player.maxHp, '#facc15');
           }
         });
 
-        // 3. Efeitos de Sangue (fx_blood)
+        // 4. Iluminação Dinâmica (Penumbra na Dungeon + Halo nas Tochas + Utevo Lux)
+        const currentTile = this.map.tiles[this.player.y][this.player.x];
+        if (currentTile.isDungeon || now < this.player.lightBuffUntil) {
+          const lctx = this.lightCtx;
+          lctx.clearRect(0, 0, 480, 352);
+          lctx.fillStyle = currentTile.isDungeon ? 'rgba(6, 8, 20, 0.68)' : 'rgba(10, 12, 24, 0.18)';
+          lctx.fillRect(0, 0, 480, 352);
+
+          lctx.globalCompositeOperation = 'destination-out';
+          const playerLightRadius = now < this.player.lightBuffUntil ? 185 : 105;
+          const pGrad = lctx.createRadialGradient(240, 176, 12, 240, 176, playerLightRadius);
+          pGrad.addColorStop(0, 'rgba(0,0,0,1)');
+          pGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          lctx.fillStyle = pGrad;
+          lctx.beginPath(); lctx.arc(240, 176, playerLightRadius, 0, Math.PI * 2); lctx.fill();
+
+          const flicker = Math.sin(now / 140) * 6;
+          this.map.lights.forEach(lt => {
+            const lx = lt.x * 32 - camX + 16;
+            const ly = lt.y * 32 - camY + 16;
+            if (lx < -120 || ly < -120 || lx > 600 || ly > 470) return;
+            const r = lt.radius + flicker;
+            const g = lctx.createRadialGradient(lx, ly, 6, lx, ly, r);
+            g.addColorStop(0, 'rgba(0,0,0,0.92)');
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            lctx.fillStyle = g;
+            lctx.beginPath(); lctx.arc(lx, ly, r, 0, Math.PI * 2); lctx.fill();
+          });
+
+          lctx.globalCompositeOperation = 'source-over';
+          ctx.drawImage(this.lightCanvas, 0, 0);
+        }
+
+        // 5. Efeitos de Sangue e Textos Flutuantes
         this.bloodEffects = this.bloodEffects.filter(b => now - b.time < 350);
         this.bloodEffects.forEach(b => {
           ctx.drawImage(this.sprites.images['fx_blood'], b.x * 32 - camX, b.y * 32 - camY);
         });
 
-        // 4. Textos Flutuantes de Dano e Cura
-        this.floatingTexts = this.floatingTexts.filter(ft => now - ft.start < 1000);
+        this.floatingTexts = this.floatingTexts.filter(ft => now - ft.start < 1050);
         ctx.font = 'bold 11px Tahoma';
         ctx.textAlign = 'center';
         this.floatingTexts.forEach(ft => {
-          const p = (now - ft.start) / 1000;
+          const p = (now - ft.start) / 1050;
           const sx = ft.x - camX;
-          const sy = ft.y - camY - p * 22;
+          const sy = ft.y - camY - p * 24;
           ctx.fillStyle = '#000';
           ctx.fillText(ft.text, sx + 1, sy + 1);
           ctx.fillStyle = ft.color;
@@ -1303,18 +1872,20 @@
         });
       }
 
-      drawNameAndBar(ctx, sx, sy, name, ratio, color = '#4ade80') {
+      drawNameAndBar(ctx, sx, sy, name, ratio, color = '#4ade80', showBar = true) {
         ctx.font = 'bold 10px Tahoma';
         ctx.textAlign = 'center';
         ctx.fillStyle = '#000';
-        ctx.fillText(name, sx + 17, sy - 6);
+        ctx.fillText(name, sx + 17, sy - (showBar ? 6 : 3));
         ctx.fillStyle = color;
-        ctx.fillText(name, sx + 16, sy - 7);
+        ctx.fillText(name, sx + 16, sy - (showBar ? 7 : 4));
 
-        ctx.fillStyle = '#000';
-        ctx.fillRect(sx + 2, sy - 4, 28, 4);
-        ctx.fillStyle = ratio > 0.5 ? '#22c55e' : ratio > 0.25 ? '#eab308' : '#ef4444';
-        ctx.fillRect(sx + 3, sy - 3, Math.max(0, Math.round(26 * ratio)), 2);
+        if (showBar) {
+          ctx.fillStyle = '#000';
+          ctx.fillRect(sx + 2, sy - 4, 28, 4);
+          ctx.fillStyle = ratio > 0.5 ? '#22c55e' : ratio > 0.25 ? '#eab308' : '#ef4444';
+          ctx.fillRect(sx + 3, sy - 3, Math.max(0, Math.round(26 * ratio)), 2);
+        }
       }
     }
 

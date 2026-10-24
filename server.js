@@ -1,7 +1,7 @@
 /**
- * TIBIA 7.x CLASSIC - MULTIPLAYER WEBSOCKET SERVER (MAX 5 PLAYERS)
- * Servidor leve em Node.js com persistência em JSON (database.json)
- * e entrega automática do cliente index.html se estiver na mesma pasta.
+ * TIBIA 7.4 CLASSIC - MULTIPLAYER WEBSOCKET & STATIC SERVER (MAX 5 PLAYERS)
+ * Serve automaticamente index.html e qualquer arquivo estático (.css, .js, .png)
+ * na raiz ou na pasta /public, além de gerenciar contas em database.json.
  */
 
 const http = require('http');
@@ -12,7 +12,17 @@ const { WebSocketServer, WebSocket } = require('ws');
 const PORT = process.env.PORT || 3000;
 const MAX_PLAYERS = 5;
 const DB_FILE = path.join(__dirname, 'database.json');
-const INDEX_FILE = path.join(__dirname, 'index.html');
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon'
+};
 
 // --- 1. BANCO DE DADOS EM ARQUIVO JSON ---
 function loadDatabase() {
@@ -20,8 +30,7 @@ function loadDatabase() {
     if (!fs.existsSync(DB_FILE)) {
       fs.writeFileSync(DB_FILE, JSON.stringify({ accounts: {} }, null, 2));
     }
-    const raw = fs.readFileSync(DB_FILE, 'utf-8');
-    return JSON.parse(raw);
+    return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
   } catch (err) {
     console.error('Erro ao ler database.json, recriando:', err);
     return { accounts: {} };
@@ -37,11 +46,9 @@ function saveDatabase(db) {
 }
 
 let db = loadDatabase();
-
-// Mapa de conexões ativas: socket -> playerState
 const activePlayers = new Map();
 
-// --- 2. SERVIDOR HTTP (Serve o index.html ou Healthcheck JSON) ---
+// --- 2. SERVIDOR HTTP DE ARQUIVOS ESTÁTICOS (Suporta Módulos e Imagens) ---
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -49,30 +56,34 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'online',
-      server: 'Tibia 7.4 Dedicated WebSocket Server',
+      server: 'Tibia 7.4 Remastered Server',
       connectedPlayers: activePlayers.size,
       maxPlayers: MAX_PLAYERS
     }));
     return;
   }
 
-  // Se você colocar o index.html junto no Render/Glitch, o link abrirá o jogo direto!
-  if (fs.existsSync(INDEX_FILE)) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(fs.readFileSync(INDEX_FILE, 'utf-8'));
+  let safeUrl = req.url.split('?')[0];
+  if (safeUrl === '/') safeUrl = '/index.html';
+
+  // Procura primeiro em /public, depois na raiz do repositório
+  let filePath = path.join(__dirname, 'public', safeUrl);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, safeUrl);
+  }
+
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
+    fs.createReadStream(filePath).pipe(res);
   } else {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'online',
-      server: 'Tibia 7.4 Dedicated WebSocket Server',
-      connectedPlayers: activePlayers.size,
-      maxPlayers: MAX_PLAYERS,
-      hint: 'Conecte seu index.html usando wss:// neste endereço!'
-    }));
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('404 - Arquivo não encontrado no servidor Tibia 7.4');
   }
 });
 
-// --- 3. SERVIDOR WEBSOCKET ---
+// --- 3. SERVIDOR WEBSOCKET MULTIPLAYER ---
 const wss = new WebSocketServer({ server });
 
 function broadcast(packet, excludeWs = null) {
@@ -88,7 +99,7 @@ wss.on('connection', (ws) => {
   if (activePlayers.size >= MAX_PLAYERS) {
     ws.send(JSON.stringify({
       type: 'SERVER_ERROR',
-      message: `O servidor está lotado! Capacidade máxima: ${MAX_PLAYERS}/${MAX_PLAYERS} jogadores.`
+      message: `Servidor lotado (${MAX_PLAYERS}/${MAX_PLAYERS} jogadores).`
     }));
     ws.close();
     return;
@@ -101,28 +112,20 @@ wss.on('connection', (ws) => {
       const packet = JSON.parse(data.toString());
       handlePacket(ws, packet);
     } catch (err) {
-      console.error('Erro ao processar pacote do cliente:', err);
+      console.error('Erro ao processar pacote:', err);
     }
   });
 
   ws.on('close', () => {
     if (authenticatedAccount && activePlayers.has(ws)) {
       const player = activePlayers.get(ws);
-      console.log(`[Disconnect] Jogador "${player.name}" desconectou.`);
-
       db = loadDatabase();
       if (db.accounts[authenticatedAccount]) {
         db.accounts[authenticatedAccount].character = player;
         saveDatabase(db);
       }
-
       activePlayers.delete(ws);
-
-      broadcast({
-        type: 'PLAYER_LEAVE',
-        id: player.id,
-        name: player.name
-      });
+      broadcast({ type: 'PLAYER_LEAVE', id: player.id, name: player.name });
     }
   });
 
@@ -134,7 +137,6 @@ wss.on('connection', (ws) => {
         db = loadDatabase();
         let acc = db.accounts[username];
 
-        // Se a conta ainda não existir no servidor, cria automaticamente no primeiro login
         if (!acc) {
           const newChar = createDefaultCharacter(username, username, 'Elite Knight');
           newChar.id = 'char_' + username;
@@ -142,7 +144,7 @@ wss.on('connection', (ws) => {
           db.accounts[username] = acc;
           saveDatabase(db);
         } else if (acc.password !== password) {
-          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Senha incorreta para esta conta!' }));
+          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Senha incorreta!' }));
           return;
         }
 
@@ -153,9 +155,7 @@ wss.on('connection', (ws) => {
 
         const others = [];
         for (const [otherSocket, otherPlayer] of activePlayers.entries()) {
-          if (otherSocket !== socket) {
-            others.push(otherPlayer);
-          }
+          if (otherSocket !== socket) others.push(otherPlayer);
         }
 
         socket.send(JSON.stringify({
@@ -165,10 +165,7 @@ wss.on('connection', (ws) => {
           otherPlayers: others
         }));
 
-        broadcast({
-          type: 'PLAYER_JOIN',
-          player: char
-        }, socket);
+        broadcast({ type: 'PLAYER_JOIN', player: char }, socket);
         break;
       }
 
@@ -180,17 +177,13 @@ wss.on('connection', (ws) => {
         db = loadDatabase();
 
         if (db.accounts[username]) {
-          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Esse nome de conta já existe!' }));
+          socket.send(JSON.stringify({ type: 'AUTH_RESULT', success: false, message: 'Conta já existe!' }));
           return;
         }
 
         const newChar = createDefaultCharacter(username, charName, vocation);
         newChar.id = 'char_' + username;
-
-        db.accounts[username] = {
-          password,
-          character: newChar
-        };
+        db.accounts[username] = { password, character: newChar };
         saveDatabase(db);
 
         authenticatedAccount = username;
@@ -208,21 +201,16 @@ wss.on('connection', (ws) => {
           otherPlayers: others
         }));
 
-        broadcast({
-          type: 'PLAYER_JOIN',
-          player: newChar
-        }, socket);
+        broadcast({ type: 'PLAYER_JOIN', player: newChar }, socket);
         break;
       }
 
       case 'PLAYER_MOVE': {
         const player = activePlayers.get(socket);
         if (!player) return;
-
         player.x = pkt.x;
         player.y = pkt.y;
         player.direction = pkt.direction || player.direction;
-
         broadcast({
           type: 'PLAYER_MOVED',
           id: player.id,
@@ -236,7 +224,6 @@ wss.on('connection', (ws) => {
       case 'PLAYER_CHAT': {
         const player = activePlayers.get(socket);
         if (!player) return;
-
         broadcast({
           type: 'CHAT_MESSAGE',
           sender: player.name,
@@ -252,14 +239,12 @@ wss.on('connection', (ws) => {
         if (!authenticatedAccount) return;
         const player = activePlayers.get(socket);
         if (!player) return;
-
         Object.assign(player, pkt.characterData);
         db = loadDatabase();
         if (db.accounts[authenticatedAccount]) {
           db.accounts[authenticatedAccount].character = player;
           saveDatabase(db);
         }
-
         socket.send(JSON.stringify({ type: 'SAVE_SUCCESS', timestamp: Date.now() }));
         break;
       }
@@ -272,38 +257,20 @@ function createDefaultCharacter(accountName, name, vocation = 'Elite Knight') {
     accountName,
     name: name || 'Knight Hero',
     vocation,
-    x: 7,
-    y: 7,
+    x: 14, // Nasce no Templo de Thais-Mini
+    y: 14,
     direction: 'S',
-    hp: vocation === 'Master Sorcerer' ? 120 : 150,
-    maxHp: vocation === 'Master Sorcerer' ? 120 : 150,
-    mp: vocation === 'Master Sorcerer' ? 110 : 60,
-    maxMp: vocation === 'Master Sorcerer' ? 110 : 60,
+    hp: vocation === 'Master Sorcerer' ? 120 : 165,
+    maxHp: vocation === 'Master Sorcerer' ? 120 : 165,
+    mp: vocation === 'Master Sorcerer' ? 120 : 65,
+    maxMp: vocation === 'Master Sorcerer' ? 120 : 65,
     level: 1,
     xp: 0,
     nextLevelXp: 100,
-    attackPower: 12,
-    defense: 6,
-    equipment: {
-      head: null,
-      body: null,
-      weapon: { id: 'item_sword', name: 'Espada Longa', spriteId: 'item_sword', type: 'weapon', stats: { atk: 12, def: 2, healAmount: 0 } },
-      shield: null
-    },
-    inventory: [
-      { id: 'item_potion', name: 'Poção de Vida', spriteId: 'item_potion', type: 'consumable', stackable: true, count: 3, stats: { atk: 0, def: 0, healAmount: 50 } },
-      { id: 'item_gold', name: 'Gold Coin', spriteId: 'item_gold', type: 'valuables', stackable: true, count: 15, stats: { atk: 0, def: 0, healAmount: 0 } },
-      ...new Array(18).fill(null)
-    ],
     updatedAt: Date.now()
   };
 }
 
 server.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`⚔️  TIBIA 7.4 DEDICATED SERVER ONLINE`);
-  console.log(`📡 Porta: ${PORT}`);
-  console.log(`👥 Limite de Jogadores: ${MAX_PLAYERS} conexões simultâneas`);
-  console.log(`💾 Banco de Dados: Local JSON (database.json)`);
-  console.log(`===============================================`);
+  console.log(`⚔️ TIBIA 7.4 REMASTERED SERVER ONLINE NA PORTA ${PORT}`);
 });
